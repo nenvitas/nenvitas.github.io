@@ -50,8 +50,10 @@
         height: auto;
       }
 
-      .iframe {
-        align-content: center;
+      .audio-container {
+       display: flex;
+       justify-content: center;
+       align-items: center;
       }
 
     </style>
@@ -64,16 +66,11 @@
       <a href="mailto:nenvitas@gmail.com">contact</a>
       <a href="https://instagram.com/nenvitas">social</a></h2>
     </header>
-    <audio controls>
-      <source src="assets/images/audio/nice-brazil-mixcopy.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-    </audio>
-    <iframe
-    frameborder="0"
-    width="500"
-    height="100"
-    src="https://drive.google.com/file/d/1IcS71ySywL1cpc_9qiaJKp2Vn2hvfot3/view?usp=sharing">
- </iframe>
+    <div class='audio-container'>
+  <audio controls>
+    <source src="https://media.githubusercontent.com/media/nenvitas/nenvitas.github.io/main/assets/images/audio/nice-brazil-mix.mp3?raw=true">
+  </audio>
+</div>
   </body>
 </html>
 
