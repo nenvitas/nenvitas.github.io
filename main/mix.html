@@ -24,6 +24,10 @@
         font-size: 14px;
         font-weight: normal;
       } 
+      audio {
+      width: 400px;
+      height: 45px;
+      }
       .description {
         margin: 0;
         font-size: 12px;
@@ -45,8 +49,8 @@
       
       .gallery img {
         margin: 10px;
-        max-width: 90%;
-        max-height: 90%;
+        max-width: 40%;
+        max-height: 40%;
         height: auto;
       }
 
@@ -56,6 +60,55 @@
        align-items: center;
       }
 
+    .button-secondary {
+    border-color: var(--colors-text-interactive-2);
+    background-color: var(--colors-text-interactive-2);
+    color: var(--colors-text-inverted);
+}
+
+.button-size {
+    --button-height: 3.125rem;
+    padding: 0.75rem 2.125rem;
+    font-size: var(--typography-button-1-font-size);
+}
+
+.button-general {
+    --button-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.5rem;
+    border: 1px solid;
+    border-radius: var(--button-height);
+    background-color: var(--colors-text-interactive-1);
+    font-family: arial,sans-serif;
+    font-size: var(--typography-button-1-font-size);
+    font-weight: 900;
+    font-style: normal;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--colors-text-inverted);
+    transition: .2s;
+    cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.button-container {
+       display: flex;
+       justify-content: center;
+       align-items: center;
+      }
+.content-container {
+  display: flex;
+  gap: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
     </style>
   </head>
   <body>
@@ -66,10 +119,20 @@
       <a href="mailto:nenvitas@gmail.com">contact</a>
       <a href="https://instagram.com/nenvitas">social</a></h2>
     </header>
+<div class="gallery">
+  <img src="/Users/user/Documents/GitHub/nenvitas.github.io/assets/images/Screenshot_20230516_145318.jpg" alt="brazilmixphoto">  
+</div>
+<div class='content-container'>
     <div class='audio-container'>
   <audio controls>
     <source src="https://media.githubusercontent.com/media/nenvitas/nenvitas.github.io/main/assets/images/audio/nice-brazil-mix.mp3?raw=true">
   </audio>
+</div>
+<div class='button-container'>
+<a type="button" href="https://drive.google.com/file/d/1IcS71ySywL1cpc_9qiaJKp2Vn2hvfot3/view?usp=sharing" class="button-general button-size button-secondary" title="Download" text="Download"><!---->
+  Download
+<!----></a>
+</div>
 </div>
   </body>
 </html>
