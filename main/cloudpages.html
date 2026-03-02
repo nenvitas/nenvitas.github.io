@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <title>Nenad Vitas – Cloud Pages</title>
+    <style>
+      body {
+        background-color: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+      }
+
+      header {
+        padding: 20px;
+        text-align: left;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 36px;
+        font-weight: normal;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: normal;
+      }
+
+      /* ── Portfolio sections ── */
+      .portfolio {
+        max-width: 860px;
+        margin: 40px auto;
+        padding: 0 20px 60px;
+      }
+
+      .project {
+        margin-bottom: 60px;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 24px;
+      }
+
+      .project-title {
+        font-size: 18px;
+        font-weight: normal;
+        margin: 0 0 6px;
+      }
+
+      .project-desc {
+        font-size: 13px;
+        color: #555;
+        margin: 0 0 20px;
+      }
+
+      /* ── Code block ── */
+      pre {
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 16px;
+        overflow-x: auto;
+        margin: 0 0 20px;
+      }
+
+      code {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre;
+      }
+
+      /* ── Screenshots ── */
+      .screenshots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .screenshots img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        flex: 1 1 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Nenad Vitas</h1>
+      <h2>
+        <a href="https://nenvitas.github.io">home</a>
+        <a href="https://nenvitas.github.io/main/mix.html">mix</a>
+        <a href="mailto:nenvitas@gmail.com">contact</a>
+        <a href="https://instagram.com/nenvitas">social</a>
+      </h2>
+    </header>
+
+    <div class="portfolio">
+
+      <!-- ── Project 1 ── -->
+      <div class="project">
+        <p class="project-title">Project Title</p>
+        <p class="project-desc">Short description of what this does.</p>
+
+        <pre><code>// paste your code here
+function example() {
+  return "hello world";
+}</code></pre>
+
+        <div class="screenshots">
+          <!-- <img src="assets/images/screenshot1.png" alt="Screenshot 1"> -->
+        </div>
+      </div>
+
+      <!-- ── Project 2 ── -->
+      <div class="project">
+        <p class="project-title">Project Title</p>
+        <p class="project-desc">Short description of what this does.</p>
+
+        <pre><code>// paste your code here</code></pre>
+
+        <div class="screenshots">
+          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>
