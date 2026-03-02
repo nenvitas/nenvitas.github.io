@@ -83,6 +83,75 @@
         border-radius: 4px;
         flex: 1 1 300px;
       }
+
+      /* ── Collapsible projects ── */
+      .project-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-bottom: 6px;
+      }
+
+      .project-header .project-title {
+        margin: 0;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        font-size: 11px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      /* hide subsections and direct pre/screenshots when project is collapsed */
+      .project.collapsed .subsection,
+      .project.collapsed > pre,
+      .project.collapsed > .screenshots {
+        display: none;
+      }
+
+      /* ── Collapsible subsections ── */
+      .subsection {
+        margin-bottom: 16px;
+      }
+
+      .subsection-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        margin-bottom: 8px;
+      }
+
+      .subsection-header .subsection-label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: bold;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .subsection-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 10px;
+        color: #bbb;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .subsection.collapsed pre,
+      .subsection.collapsed .screenshots {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -101,15 +170,20 @@
       <!-- ── Project 1 ── -->
       <div class="project">
         <p class="project-title">Template Configurations</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// HTML
-// HTML
-{{!--
+        <p class="project-desc">Opportunity creation pop-up modal</p>
+        <div class="screenshots">
+               <img src="assets/images/popupscreen.jpg" alt="Screenshot 1">
+        </div>
+      </div>
+        <div class="subsection">
+          <p class="subsection-label">HTML</p>
+          <pre><code id="code-tmpl-html"></code></pre>
+          <template id="tmpl-tmpl-html"> // html
+          {{!--
     Web Template to serve for the quote model/popup on the Home and Auto insurance product pages only.
-    This template has been adapted from Global Template (Exit Intent Pop-Up with Email Capture) provided by IS. 
-    
-    Requirements: 
+    This template has been adapted from Global Template (Exit Intent Pop-Up with Email Capture) provided by IS.
+
+    Requirements:
     1) Set the content zone(s) to that defined in your Sitemap.
     2) Track clicks on Get a quote CTA.
 
@@ -127,112 +201,2043 @@
     Handlebars expressions for these properties must be wrapped in three sets of curly braces (e.g. {{{expression}}} ).
     7) Change the value of the aria-label attributes as necessary.
     8) Change the error message in the .evg-error-msg. Styling can be changed in CSS.
---}} 
+--}}
 
 
 
 
-&amp;lt;div id=&quot;evg-quote-popup&quot; data-evg-campaign-id=&quot;{{campaign}}&quot;
-data-evg-experience-id=&quot;{{experience}}&quot; data-evg-user-group=&quot;{{userGroup}}&quot; aria-hidden=&quot;false&quot; role=&quot;alert&quot;&amp;gt;
+<div id="evg-quote-popup" data-evg-campaign-id="{{campaign}}"
+data-evg-experience-id="{{experience}}" data-evg-user-group="{{userGroup}}" aria-hidden="false" role="alert">
 
 
 
 
     {{#if lightbox}}
-        &amp;lt;div class=&quot;evg-overlay&quot; data-evg-dismissal&amp;gt;&amp;lt;/div&amp;gt;
+        <div class="evg-overlay" data-evg-dismissal></div>
     {{/if}}
-    &amp;lt;div class=&quot;evg-popup evg-style-bg {{style.className}}&quot; style=&quot;background-image:url('{{imageUrl}}')&quot;&amp;gt;
-        &amp;lt;div class=&quot;evg-main-panel&quot;&amp;gt;
-            &amp;lt;button class=&quot;evg-btn-dismissal evg-style-text {{style.className}}&quot; id=&quot;closeButton&quot;
-                aria-label=&quot;{{closebtn}}&quot; tabindex=&quot;1&quot; data-evg-dismissal&amp;gt;&amp;times; &amp;lt;span&amp;gt;&amp;lt;/span&amp;gt;&amp;lt;/button&amp;gt; 
+    <div class="evg-popup evg-style-bg {{style.className}}" style="background-image:url('{{imageUrl}}')">
+        <div class="evg-main-panel">
+            <button class="evg-btn-dismissal evg-style-text {{style.className}}" id="closeButton"
+                aria-label="{{closebtn}}" tabindex="1" data-evg-dismissal>&times; <span></span></button> 
             
              Slide 1 - Initial Content
-            &amp;lt;div id=&quot;evg-slide-1&quot; class=&quot;evg-slide&quot;&amp;gt;
-                &amp;lt;div class=&quot;evg-main-content-wrapper-div&quot;&amp;gt;
-                    &amp;lt;div class=&quot;evg-main-content-div&quot;&amp;gt;
-                        &amp;lt;h1 class=&quot;evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}&quot;&amp;gt;
+            <div id="evg-slide-1" class="evg-slide">
+                <div class="evg-main-content-wrapper-div">
+                    <div class="evg-main-content-div">
+                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
                         {{~header~}}
-                        &amp;lt;/h1&amp;gt;
+                        </h1>
                         {{#if subheader1}}
-                        &amp;lt;p class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
                             {{~subheader1~}}
-                        &amp;lt;/p&amp;gt;
+                        </p>
                         {{/if}}
                         {{#if subheader2}}
-                        &amp;lt;p class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
                             {{~subheader2~}}
-                        &amp;lt;/p&amp;gt;
+                        </p>
                         {{/if}}
                         {{#if subheader3}}
-                        &amp;lt;p class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
                             {{~subheader3~}}
-                        &amp;lt;/p&amp;gt;
+                        </p>
                         {{/if}}
-                                        &amp;lt;div class=&quot;evg-main-footer-div&quot;&amp;gt;
-                    &amp;lt;div class=&quot;evg-main-footer-cancel-btn&quot;&amp;gt;
-                    &amp;lt;button class=&quot;evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text&quot; id=&quot;remindmelater&quot;&amp;gt;
+                                        <div class="evg-main-footer-div">
+                    <div class="evg-main-footer-cancel-btn">
+                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="remindmelater">
                         {{remindmelater}}
-                    &amp;lt;/button&amp;gt;
-                    &amp;lt;/div&amp;gt;
-                    &amp;lt;div class=&quot;evg-main-footer-cta-btn&quot;&amp;gt;
-                        &amp;lt;button class=&quot;evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}&quot; id=&quot;nextToSlide2&quot; tabindex=&quot;3&quot;&amp;gt;
+                    </button>
+                    </div>
+                    <div class="evg-main-footer-cta-btn">
+                        <button class="evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="nextToSlide2" tabindex="3">
                         {{~ctaText~}}
-                        &amp;lt;/button&amp;gt;
-                    &amp;lt;/div&amp;gt;
-                &amp;lt;/div&amp;gt;
-                    &amp;lt;/div&amp;gt;
-                    &amp;lt;div class=&quot;evg-main-image-div&quot;&amp;gt;&amp;lt;img style=&quot;width: 100%;&quot; src=&quot;https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png&quot; alt=&quot;Family in Logo&quot;&amp;gt;
-&amp;lt;/div&amp;gt;
-                &amp;lt;/div&amp;gt;
-                &amp;lt;/div&amp;gt;
+                        </button>
+                    </div>
+                </div>
+                    </div>
+                    <div class="evg-main-image-div"><img style="width: 100%;" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Logo">
+</div>
+                </div>
+                </div>
             
             Slide 2 - Additional Content
-            &amp;lt;div id=&quot;evg-slide-2&quot; class=&quot;evg-slide evg-hide&quot;&amp;gt;
-                &amp;lt;div class=&quot;evg-main-content-wrapper-div&quot;&amp;gt;
-                    &amp;lt;div class=&quot;evg-main-content-div&quot;&amp;gt;
-                        &amp;lt;h1 class=&quot;evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}&quot;&amp;gt;
+            <div id="evg-slide-2" class="evg-slide evg-hide">
+                <div class="evg-main-content-wrapper-div">
+                    <div class="evg-main-content-div">
+                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
                         {{~header2~}}
-                        &amp;lt;/h1&amp;gt;
-                &amp;lt;div class=&quot;evg-additional-content-wrapper&quot;&amp;gt;
-                    &amp;lt;p class=&quot;evg-content-text evg-style-text {{style.className}}&quot;&amp;gt;
+                        </h1>
+                <div class="evg-additional-content-wrapper">
+                    <p class="evg-content-text evg-style-text {{style.className}}">
                                                 {{~subheader4~}}
-                    &amp;lt;/p&amp;gt;
-                &amp;lt;/div&amp;gt;
-                &amp;lt;div class=&quot;evg-main-footer-div&quot;&amp;gt;
-                &amp;lt;div class=&quot;evg-slide-nav&quot;&amp;gt;
-                    &amp;lt;button class=&quot;evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}&quot; id=&quot;finalCTA&quot;&amp;gt;
+                    </p>
+                </div>
+                <div class="evg-main-footer-div">
+                <div class="evg-slide-nav">
+                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
                                                 {{~closectaText~}}
-                    &amp;lt;/button&amp;gt;
-                &amp;lt;/div&amp;gt;
-                &amp;lt;/div&amp;gt;
-                    &amp;lt;/div&amp;gt;
-                                        &amp;lt;div class=&quot;evg-main-image-div&quot;&amp;gt;&amp;lt;img style=&quot;width: 100%;&quot;src=&quot;https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png&quot; alt=&quot;Family in Coops Logo&quot;&amp;gt;
-&amp;lt;/div&amp;gt;
-                &amp;lt;/div&amp;gt;
-            &amp;lt;/div&amp;gt;
-            &amp;lt;/div&amp;gt;
+                    </button>
+                </div>
+                </div>
+                    </div>
+                                        <div class="evg-main-image-div"><img style="width: 100%;"src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Coops Logo">
+</div>
+                </div>
+            </div>
+            </div>
             Slide 3 - Final Content (can be commented out if not needed)
-            &amp;lt;div id=&quot;evg-slide-3&quot; class=&quot;evg-slide evg-hide&quot;&amp;gt;
-                &amp;lt;div class=&quot;evg-additional-content-wrapper&quot;&amp;gt;
-                    &amp;lt;h2 class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;Final Information&amp;lt;/h2&amp;gt;
-                    &amp;lt;p class=&quot;evg-content-text evg-style-text {{style.className}}&quot;&amp;gt;
+            <div id="evg-slide-3" class="evg-slide evg-hide">
+                <div class="evg-additional-content-wrapper">
+                    <h2 class="evg-subheader evg-h2 evg-style-text {{style.className}}">Final Information</h2>
+                    <p class="evg-content-text evg-style-text {{style.className}}">
                         This is the third slide with final information or a call to action.
-                    &amp;lt;/p&amp;gt;
-                &amp;lt;/div&amp;gt;
-                &amp;lt;div class=&quot;evg-slide-nav&quot;&amp;gt;
-                    &amp;lt;button class=&quot;evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text&quot; id=&quot;prevToSlide2&quot;&amp;gt;
+                    </p>
+                </div>
+                <div class="evg-slide-nav">
+                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="prevToSlide2">
                         Previous
-                    &amp;lt;/button&amp;gt;
-                    &amp;lt;button class=&quot;evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}&quot; id=&quot;finalCTA&quot;&amp;gt;
+                    </button>
+                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
                         Complete
-                    &amp;lt;/button&amp;gt;
-                &amp;lt;/div&amp;gt;
-            &amp;lt;/div&amp;gt;
-        &amp;lt;/div&amp;gt;
-    &amp;lt;/div&amp;gt;
-    &amp;lt;/div&amp;gt;
-</code></pre>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+          </template>
+        </div>
 
+        <div class="subsection">
+          <p class="subsection-label">CSS</p>
+          <pre><code id="code-tmpl-css"></code></pre>
+          <template id="tmpl-tmpl-css"> // css
+
+
+
+
+/* ==========================================================================
+   Pop-up
+========================================================================== */
+
+
+
+
+#evg-quote-popup {
+    position: relative;
+    z-index: 10000000;
+}
+
+
+
+
+#evg-quote-popup .evg-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: .3;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+}
+
+
+
+
+#evg-quote-popup .evg-popup {
+    padding: 10px;      
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 690px;
+    height: 370px;
+    /* height: auto!important; */
+    box-shadow: 0px 5px 5px #CCD5E2;    
+    border-radius: 20px;    
+    background-color: #fff; 
+    background-position: center bottom; 
+    background-size: cover; 
+    background-repeat: no-repeat;   
+    /* transform: translateX(-50%) translateY(-50%); */
+}
+
+
+
+
+#evg-quote-popup .evg-btn-dismissal {
+    position: absolute;
+    top: 8px;
+    right: 20px;
+    padding: 0 .5rem;
+    border: 1px solid transparent;
+    background-color: transparent;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;    
+    width: 16px;
+    height: 16px;
+}
+
+
+
+
+#evg-quote-popup .evg-main-panel,
+#evg-quote-popup .evg-confirm-panel {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+
+
+
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+
+
+
+
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+
+
+
+
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+
+
+
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+
+
+
+#evg-quote-popup .evg-confirm-header {
+    display: inline-block;
+    margin: 0 0 .5rem;
+}
+
+
+
+
+#evg-quote-popup .evg-confirm-subheader {
+    display: inline-block;
+    margin: 0 0 .5rem;
+}
+
+
+
+
+#evg-quote-popup .evg-opt-out-msg {
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-color: #006EB3;
+    color: #006EB3;
+    background-color: #fff;
+}
+
+
+
+
+/* ==========================================================================
+   Form
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-form {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+
+
+
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+
+
+
+
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+
+
+
+
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+
+
+
+    width: 100%;
+    text-align: center;
+}
+
+
+
+
+#evg-quote-popup .evg-email {
+    width: 75%;
+    margin: .5rem 0;
+    padding: .5rem 1rem;
+    border: 1px solid #ddd; 
+    color: #59575c;
+}
+
+
+
+
+/* ==========================================================================
+   Headers
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-h1,
+#evg-quote-popup .evg-h2 {
+    margin: 0 0 .5rem;
+    padding: 0;
+    color: inherit;
+    font-weight: 500;
+    font-family: inherit;
+    line-height: var(--typography-heading-2-line-height);
+}
+#evg-quote-popup .evg-h2 {
+    font-weight: 500;
+    line-height: 1.5rem;
+    margin: .5rem!important;
+}
+#evg-quote-popup .evg-h1.evg-display-4 {
+    font-size: 32px;
+    font-weight: 700;
+    padding-bottom: 10px!important;
+}
+
+
+
+
+#evg-quote-popup .evg-h2 {
+    font-size: 16px;
+}
+
+
+
+
+/* ==========================================================================
+   Call-To-Action Button
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-btn {
+    --button-height: 3.125rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--button-height);
+    border: 1px solid;
+    border-radius: var(--button-height);
+    font-family: manrope,avenir,arial,sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    /*line-height: 1.25;*/
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--colors-text-inverted);
+    transition: .2s;
+    cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary {
+    border:2px solid #006EB3;
+    color: #fff;
+    background-color: #006EB3;
+    transition: background-color .15s, color .15s;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary:hover {
+    background-color: #FFF;
+    border-color: #006eb3;
+    color: #006eb3;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary-cancel {  
+    color:#006EB3;  
+    border-color: #006EB3;  
+    background-color: #fff; 
+    transition: background-color .15s, color .15s;  
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary-cancel:hover {
+    background-color: #006eb3;
+    border-color: #006eb3;
+    color: white;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-lg {
+    padding: .8rem 2rem;
+    font-size: 16px;
+    text-wrap: nowrap;
+}
+
+
+
+
+#evg-quote-popup .evg-cta {
+    margin: .5rem 0;
+    height: 38px;
+    line-height: 1.65 !important;
+}
+
+
+
+
+#evg-quote-popup .evg-main-content-wrapper-div{
+  display: flex;
+  align-items: center;
+}
+
+
+
+
+#evg-quote-popup .evg-main-content-div{ 
+    width: 70%;
+    text-align:left;    
+    padding-bottom:80px;
+    padding-left: 20px; 
+    padding-right: 15px;
+}   
+
+
+
+
+#evg-quote-popup .evg-main-image-div{
+    display: flex;  
+    align-self: center;
+    padding-bottom:80px;
+    width: 35%;     
+}   
+
+
+
+
+#evg-quote-popup .evg-main-footer-div{  
+    width: 90%;
+    position: absolute;
+    bottom: 10%;
+    left: 5%;
+    height: 60px;
+    column-count: 3;
+    display: flex;
+    justify-content: space-between;
+    column-gap: 3rem;    
+}   
+#evg-quote-popup .evg-main-footer-cta-btn{  
+    float: right;   
+}   
+#evg-quote-popup .evg-main-footer-cancel-btn{     
+}
+/* ==========================================================================
+   Error Message
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-error-msg {
+    color: #ff0000;
+    font-size: 1rem;
+}
+
+
+
+
+/* ==========================================================================
+   Style
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-style-bg.evg-light-on-dark {
+    background-color: #343a40;
+}
+
+
+
+
+#evg-quote-popup .evg-style-bg.evg-dark-on-light {
+    background-color: #fff;
+}
+
+
+
+
+#evg-quote-popup .evg-style-text.evg-light-on-dark {
+    color: #fff;
+}
+
+
+
+
+#evg-quote-popup .evg-style-text.evg-dark-on-light {
+    color: #343a40;
+}
+
+
+
+
+/* ==========================================================================
+   Visibility
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-hide {
+    visibility: hidden;
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+
+
+
+/* ==========================================================================
+   Media Queries
+========================================================================== */
+
+
+
+
+@media screen and (max-height: 500px) {
+    #evg-quote-popup .evg-popup {
+        height: 500px;
+        border-radius: 20px;
+    }
+}
+
+
+
+
+@media screen and (max-width: 575px) {
+#evg-quote-popup .evg-popup {
+        width: 80%;
+        max-width: 500px;
+        border-radius: 20px;
+        height: auto;
+    }
+
+
+    #evg-quote-popup .evg-h1.evg-display-4 {
+        font-size: 22px;
+        margin-top: 50px;
+    }
+
+
+
+
+    #evg-quote-popup .evg-h2 {
+        font-size: 16px;
+    }
+#evg-quote-popup .evg-btn {
+    min-height: 2rem;
+}
+
+
+    #evg-quote-popup .evg-btn-lg {
+        font-size: 16px;
+        padding: .8rem 2rem; 
+        height: 42px;
+    } 
+
+
+    #evg-quote-popup .evg-btn-lg {
+        font-size: 16px;
+        padding: .8rem 2rem; 
+        height: 42px;
+    } 
+
+
+    #evg-quote-popup .evg-error-msg,
+    #evg-quote-popup .evg-opt-out-msg {
+        font-size: 16px;
+        padding: .8rem 2rem;
+    }
+
+
+
+
+    #evg-quote-popup .evg-main-footer-div {
+    width: 100%;
+    position: initial;
+    bottom: 10%;
+    left: 5%;
+    height: auto; 
+    /* column-count: 3; */
+    display: flex;
+    column-gap: 3rem;
+    flex-direction: column-reverse;
+    justify-content: center;
+    text-align: center;
+    }
+    #evg-quote-popup .evg-main-footer-cancel-btn,
+    #evg-quote-popup .evg-main-footer-cta-btn {
+        float: none;
+    }
+    #evg-quote-popup .evg-main-footer-cta-btn {
+        margin-top: 10px;
+    }
+    #evg-quote-popup .evg-opt-out-msg {
+        margin-top: 10px;
+    }
+    #evg-quote-popup .evg-main-content-div {
+        width: 100%;
+        padding-bottom: 20px; 
+    }
+    #evg-quote-popup .evg-main-image-div {
+        display: none; 
+    }
+}
+@media screen and (max-width: 345px) {
+    #evg-quote-popup .evg-opt-out-msg {
+        margin-top: 10px;
+    }
+    #evg-quote-popup .evg-main-footer-cancel-btn,
+    #evg-quote-popup .evg-main-footer-cta-btn {
+        float: none;
+    }
+    #evg-quote-popup .evg-main-footer-div {
+        position: relative;
+        height: 85px;
+    }
+     #evg-quote-popup .evg-popup {
+        height: auto;
+    }
+}
+
+
+/* Additional content styling */
+#evg-quote-popup #evg-additional-content {
+    width: 100%;
+    padding: 20px;
+    text-align: left;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+#evg-quote-popup .evg-additional-content-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+#evg-quote-popup .evg-content-text {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+
+/* Ensure the hide class works properly */
+#evg-quote-popup .evg-hide {
+    display: none !important;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+          </template>
+        </div>
+
+                <div class="subsection">
+          <p class="subsection-label">JS</p>
+          <pre><code id="code-tmpl-js"></code></pre>
+          <template id="tmpl-tmpl-js"> // js
+
+(function() {
+
+
+
+
+    const pageExitMillis = 100;
+
+
+
+
+    /**
+     * @function buildBindId
+     * @param {Object} context
+     * @description Create unique bind ID based on the campaign and experience IDs.
+     */
+    function buildBindId(context) {
+        return `${context.campaign}:${context.experience}`;
+    }
+
+
+
+
+    /**
+     * @function setConfirmationPanel
+     * @description Add click listener to the Call-To-Action button that validates the user email address,
+     * shows the Confirmation Panel, removes dismissal tracking from the "X" button and overlay, and sends
+     * an event to Interaction Studio to set the emailAddress attribute to the user email address.
+     */
+    function setConfirmationPanel() {
+        SalesforceInteractions.cashDom("#evg-quote-popup .evg-error-msg")
+                    .removeClass("evg-hide")
+                    .addClass("evg-error");
+    }
+
+
+
+
+    /**
+     * @function setDismissal
+     * @param {Object} context
+     * @description Add click listener to the overlay, "X" button, and opt-out text that removes the
+     * template from the DOM.
+     */
+    function setDismissal(context) {
+        const dismissSelectors = `
+            #evg-quote-popup .evg-overlay,
+            #evg-quote-popup .evg-btn-dismissal,
+            #evg-quote-popup .evg-opt-out-msg,
+            #evg-quote-popup #finalCTA
+        `;
+
+
+
+
+        SalesforceInteractions.cashDom(dismissSelectors).on("click", () => {
+            SalesforceInteractions.cashDom("#evg-quote-popup").remove();
+            /* sessionStorage.setItem("isPopupClosed", "true"); */
+            SalesforceInteractions.sendEvent({
+                        interaction: {
+                            name: "Quote Popup - Wealth Opportunity Request Dismissal"
+                        }
+                    });
+        });
+    }
+
+
+
+
+    /**
+     * @function setSlideNavigation
+     * @description Add click listeners for slide navigation
+     */
+    function setSlideNavigation() {
+        // Navigate from slide 1 to slide 2
+        SalesforceInteractions.cashDom("#evg-quote-popup #nextToSlide2").on("click", () => {
+            console.log("Moving to slide 2");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-1").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").removeClass("evg-hide");
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Moved to Slide 2"
+                }
+            });
+        });
+
+
+        // Final CTA action
+        SalesforceInteractions.cashDom("#evg-quote-popup #remindmelater").on("click", () => {
+            console.log("Remind Me Later CTA clicked");
+            SalesforceInteractions.cashDom("#evg-quote-popup").remove();
+            // Add your final action here (e.g., redirect, form submission, etc.)
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Remind Me Later Wealth Selected"
+                }
+            });
+        });       
+        // Navigate from slide 2 back to slide 1
+        SalesforceInteractions.cashDom("#evg-quote-popup #prevToSlide1").on("click", () => {
+            console.log("Moving back to slide 1");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-1").removeClass("evg-hide");
+        });
+        
+        // Navigate from slide 2 to slide 3
+        SalesforceInteractions.cashDom("#evg-quote-popup #nextToSlide3").on("click", () => {
+            console.log("Moving to slide 3");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-3").removeClass("evg-hide");
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Moved to Slide 3"
+                }
+            });
+        });
+        
+        // Navigate from slide 3 back to slide 2
+        SalesforceInteractions.cashDom("#evg-quote-popup #prevToSlide2").on("click", () => {
+            console.log("Moving back to slide 2");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-3").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").removeClass("evg-hide");
+        });
+        
+        // Final CTA action
+        SalesforceInteractions.cashDom("#evg-quote-popup #nextToSlide2").on("click", () => {
+            console.log("Request a call CTA clicked");
+            // Add your final action here (e.g., redirect, form submission, etc.)
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Wealth Opportunity Request Clicked"
+                }
+            });
+        });
+    }
+
+
+
+
+    function apply(context, template) {
+        if (!context.contentZone) return;
+
+
+        /**
+         * The pageElementLoaded method waits for the html element to be loaded before rendering the content template.
+         *
+         * Visit the Template Display Utilities documentation to learn more:
+         * https://developer.evergage.com/campaign-development/web-templates/web-display-utilities
+         */
+        return SalesforceInteractions.DisplayUtils
+            .bind(buildBindId(context))
+            .pageElementLoaded('body')
+            .then(() => {
+                if (SalesforceInteractions.cashDom("#evg-exit-intent-popup").length > 0) return;
+                const html = template(context);
+                SalesforceInteractions.cashDom("body").append(html);
+                setConfirmationPanel();
+                setDismissal(context);
+                setSlideNavigation(); // Replace setCTAAction with setSlideNavigation
+            });
+    }
+
+
+
+
+    function reset(context, template) {
+        SalesforceInteractions.DisplayUtils.unbind(buildBindId(context));
+        SalesforceInteractions.cashDom("#evg-quote-popup").remove();
+    }
+
+
+
+
+    function control(context) {
+        return SalesforceInteractions.DisplayUtils
+            .bind(buildBindId(context))
+            .pageElementLoaded('body') 
+            .then(() => {
+                if (context.contentZone) return true;
+            });
+    }
+
+
+
+
+     
+
+
+
+
+    registerTemplate({
+        apply: apply,
+        reset: reset,
+        control: control
+    });
+
+
+
+
+
+
+
+
+})();
+
+          </template>
+        </div>
+
+                       <div class="subsection">
+          <p class="subsection-label">SSJS</p>
+          <pre><code id="code-tmpl-ssjs"></code></pre>
+          <template id="tmpl-tmpl-ssjs"> // ssjs
+
+export class StyleField {
+    label: string;
+    className: string;
+}
+
+
+export class ExitIntentPopupWithEmailCapture implements CampaignTemplateComponent {
+
+
+    @header("Pop-Up Type")
+
+
+    lightbox: boolean = true;
+
+
+
+
+    /*@title("Background Image URL")
+    imageUrl: string = "";
+    */
+    @subtitle("Define header and subheader text styling.")
+    
+    header: string = "Let’s talk about building your wealth";
+
+
+    @subtitle("Optional text field")
+    subheader1: string = "Our financial representative can help you:";
+    @subtitle("Optional text field")
+    subheader2: string = "Build a customized investment portfolio";
+    @subtitle("Optional text field")
+    subheader3: string = "Create a personalized investment strategy ";
+
+
+    @title("Aria Label Cancel Button")
+    @subtitle("Define Aria Label for Cancel Button")
+    cancelbtn: string = "cancel button";
+
+
+    @title("Aria Label Close Button")
+    @subtitle("Define Aria Label for Close Button")
+    closebtn: string = "close";
+
+
+    @title("Aria Label for Pop Up Closed")
+    @subtitle("Define Aria Label for Pop Up Closed")
+    popupclosedtext: string = "Ready for quote pop-up modal is closed";
+
+
+     @title("Aria Label for Skip to Search")
+    @subtitle("Define Aria Label for Skip to Search")
+    skiptosearch: string = "Skip to Search";
+
+
+    @title("CTA Text")
+    ctaText: string = "Request a call";
+    
+    @title("Remind Me Later")
+    remindmelater: string = "Request a call";
+
+
+    @title("CTA Destination URL")
+    @subtitle("Requires full URL string including https://")
+    ctaUrl: string = "https://www.REDACT.ca/en/financial-representative";
+
+
+    @title("Opt-Out Text")
+    @subtitle("Clicking this text closes the pop-up.")
+    optOutText: string = "No Thanks";
+
+
+/* Second Slide */
+    @subtitle("SECOND SLIDE HEADER")
+    header2: string = "Thanks! We’ll be in touch";
+    @subtitle("SECOND SLIDE SUBHEADER")
+    subheader4: string = "A financial representative will call you in the next two days. ";
+    @title("CTA Text")
+    closectaText: string = "Close";
+
+
+    run(context: CampaignComponentContext) {
+        return {};
+    }
+
+
+}
+
+          </template>
+        </div>
+        <p class="project-desc">Short description of what this does.</p>
+        <div class="screenshots">
+               <img src="assets/images/popupscreen.jpg" alt="Screenshot 1">
+        </div>
+      </div>
+        <div class="subsection">
+          <p class="subsection-label">HTML</p>
+          <pre><code id="code-tmpl-html"></code></pre>
+          <template id="tmpl-tmpl-html"> // html
+          {{!--
+    Web Template to serve for the quote model/popup on the Home and Auto insurance product pages only.
+    This template has been adapted from Global Template (Exit Intent Pop-Up with Email Capture) provided by IS.
+
+    Requirements:
+    1) Set the content zone(s) to that defined in your Sitemap.
+    2) Track clicks on Get a quote CTA.
+
+
+
+
+    Customizations:
+    1) See https://developer.evergage.com/web-integration/sitemap/contentzones for recommended names for content zones
+    mapped via the Sitemap.
+    2) Style options can be changed in Serverside Code.
+    3) Styling of the Style options, including fallback background color, can be changed in CSS.
+    4) Remove or change the default values for the configuration properties in Serverside Code.
+    5) Media query breakpoints can be changed in CSS.
+    6) To support rich text, add the @richtext(true) decorator to configuration properties in Serverside Code.
+    Handlebars expressions for these properties must be wrapped in three sets of curly braces (e.g. {{{expression}}} ).
+    7) Change the value of the aria-label attributes as necessary.
+    8) Change the error message in the .evg-error-msg. Styling can be changed in CSS.
+--}}
+
+
+
+
+<div id="evg-quote-popup" data-evg-campaign-id="{{campaign}}"
+data-evg-experience-id="{{experience}}" data-evg-user-group="{{userGroup}}" aria-hidden="false" role="alert">
+
+
+
+
+    {{#if lightbox}}
+        <div class="evg-overlay" data-evg-dismissal></div>
+    {{/if}}
+    <div class="evg-popup evg-style-bg {{style.className}}" style="background-image:url('{{imageUrl}}')">
+        <div class="evg-main-panel">
+            <button class="evg-btn-dismissal evg-style-text {{style.className}}" id="closeButton"
+                aria-label="{{closebtn}}" tabindex="1" data-evg-dismissal>&times; <span></span></button> 
+            
+             Slide 1 - Initial Content
+            <div id="evg-slide-1" class="evg-slide">
+                <div class="evg-main-content-wrapper-div">
+                    <div class="evg-main-content-div">
+                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
+                        {{~header~}}
+                        </h1>
+                        {{#if subheader1}}
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                            {{~subheader1~}}
+                        </p>
+                        {{/if}}
+                        {{#if subheader2}}
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                            {{~subheader2~}}
+                        </p>
+                        {{/if}}
+                        {{#if subheader3}}
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                            {{~subheader3~}}
+                        </p>
+                        {{/if}}
+                                        <div class="evg-main-footer-div">
+                    <div class="evg-main-footer-cancel-btn">
+                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="remindmelater">
+                        {{remindmelater}}
+                    </button>
+                    </div>
+                    <div class="evg-main-footer-cta-btn">
+                        <button class="evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="nextToSlide2" tabindex="3">
+                        {{~ctaText~}}
+                        </button>
+                    </div>
+                </div>
+                    </div>
+                    <div class="evg-main-image-div"><img style="width: 100%;" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Logo">
+</div>
+                </div>
+                </div>
+            
+            Slide 2 - Additional Content
+            <div id="evg-slide-2" class="evg-slide evg-hide">
+                <div class="evg-main-content-wrapper-div">
+                    <div class="evg-main-content-div">
+                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
+                        {{~header2~}}
+                        </h1>
+                <div class="evg-additional-content-wrapper">
+                    <p class="evg-content-text evg-style-text {{style.className}}">
+                                                {{~subheader4~}}
+                    </p>
+                </div>
+                <div class="evg-main-footer-div">
+                <div class="evg-slide-nav">
+                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
+                                                {{~closectaText~}}
+                    </button>
+                </div>
+                </div>
+                    </div>
+                                        <div class="evg-main-image-div"><img style="width: 100%;"src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Coops Logo">
+</div>
+                </div>
+            </div>
+            </div>
+            Slide 3 - Final Content (can be commented out if not needed)
+            <div id="evg-slide-3" class="evg-slide evg-hide">
+                <div class="evg-additional-content-wrapper">
+                    <h2 class="evg-subheader evg-h2 evg-style-text {{style.className}}">Final Information</h2>
+                    <p class="evg-content-text evg-style-text {{style.className}}">
+                        This is the third slide with final information or a call to action.
+                    </p>
+                </div>
+                <div class="evg-slide-nav">
+                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="prevToSlide2">
+                        Previous
+                    </button>
+                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
+                        Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+          </template>
+        </div>
+
+        <div class="subsection">
+          <p class="subsection-label">CSS</p>
+          <pre><code id="code-tmpl-css"></code></pre>
+          <template id="tmpl-tmpl-css"> // css
+
+
+
+
+/* ==========================================================================
+   Pop-up
+========================================================================== */
+
+
+
+
+#evg-quote-popup {
+    position: relative;
+    z-index: 10000000;
+}
+
+
+
+
+#evg-quote-popup .evg-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: .3;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+}
+
+
+
+
+#evg-quote-popup .evg-popup {
+    padding: 10px;      
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 690px;
+    height: 370px;
+    /* height: auto!important; */
+    box-shadow: 0px 5px 5px #CCD5E2;    
+    border-radius: 20px;    
+    background-color: #fff; 
+    background-position: center bottom; 
+    background-size: cover; 
+    background-repeat: no-repeat;   
+    /* transform: translateX(-50%) translateY(-50%); */
+}
+
+
+
+
+#evg-quote-popup .evg-btn-dismissal {
+    position: absolute;
+    top: 8px;
+    right: 20px;
+    padding: 0 .5rem;
+    border: 1px solid transparent;
+    background-color: transparent;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;    
+    width: 16px;
+    height: 16px;
+}
+
+
+
+
+#evg-quote-popup .evg-main-panel,
+#evg-quote-popup .evg-confirm-panel {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+
+
+
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+
+
+
+
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+
+
+
+
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+
+
+
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+
+
+
+#evg-quote-popup .evg-confirm-header {
+    display: inline-block;
+    margin: 0 0 .5rem;
+}
+
+
+
+
+#evg-quote-popup .evg-confirm-subheader {
+    display: inline-block;
+    margin: 0 0 .5rem;
+}
+
+
+
+
+#evg-quote-popup .evg-opt-out-msg {
+    font-size: 1.25rem;
+    cursor: pointer;
+    border-color: #006EB3;
+    color: #006EB3;
+    background-color: #fff;
+}
+
+
+
+
+/* ==========================================================================
+   Form
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-form {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+
+
+
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+
+
+
+
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+
+
+
+
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+
+
+
+    width: 100%;
+    text-align: center;
+}
+
+
+
+
+#evg-quote-popup .evg-email {
+    width: 75%;
+    margin: .5rem 0;
+    padding: .5rem 1rem;
+    border: 1px solid #ddd; 
+    color: #59575c;
+}
+
+
+
+
+/* ==========================================================================
+   Headers
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-h1,
+#evg-quote-popup .evg-h2 {
+    margin: 0 0 .5rem;
+    padding: 0;
+    color: inherit;
+    font-weight: 500;
+    font-family: inherit;
+    line-height: var(--typography-heading-2-line-height);
+}
+#evg-quote-popup .evg-h2 {
+    font-weight: 500;
+    line-height: 1.5rem;
+    margin: .5rem!important;
+}
+#evg-quote-popup .evg-h1.evg-display-4 {
+    font-size: 32px;
+    font-weight: 700;
+    padding-bottom: 10px!important;
+}
+
+
+
+
+#evg-quote-popup .evg-h2 {
+    font-size: 16px;
+}
+
+
+
+
+/* ==========================================================================
+   Call-To-Action Button
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-btn {
+    --button-height: 3.125rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--button-height);
+    border: 1px solid;
+    border-radius: var(--button-height);
+    font-family: manrope,avenir,arial,sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    /*line-height: 1.25;*/
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--colors-text-inverted);
+    transition: .2s;
+    cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary {
+    border:2px solid #006EB3;
+    color: #fff;
+    background-color: #006EB3;
+    transition: background-color .15s, color .15s;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary:hover {
+    background-color: #FFF;
+    border-color: #006eb3;
+    color: #006eb3;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary-cancel {  
+    color:#006EB3;  
+    border-color: #006EB3;  
+    background-color: #fff; 
+    transition: background-color .15s, color .15s;  
+}
+
+
+
+
+#evg-quote-popup .evg-btn-primary-cancel:hover {
+    background-color: #006eb3;
+    border-color: #006eb3;
+    color: white;
+}
+
+
+
+
+#evg-quote-popup .evg-btn-lg {
+    padding: .8rem 2rem;
+    font-size: 16px;
+    text-wrap: nowrap;
+}
+
+
+
+
+#evg-quote-popup .evg-cta {
+    margin: .5rem 0;
+    height: 38px;
+    line-height: 1.65 !important;
+}
+
+
+
+
+#evg-quote-popup .evg-main-content-wrapper-div{
+  display: flex;
+  align-items: center;
+}
+
+
+
+
+#evg-quote-popup .evg-main-content-div{ 
+    width: 70%;
+    text-align:left;    
+    padding-bottom:80px;
+    padding-left: 20px; 
+    padding-right: 15px;
+}   
+
+
+
+
+#evg-quote-popup .evg-main-image-div{
+    display: flex;  
+    align-self: center;
+    padding-bottom:80px;
+    width: 35%;     
+}   
+
+
+
+
+#evg-quote-popup .evg-main-footer-div{  
+    width: 90%;
+    position: absolute;
+    bottom: 10%;
+    left: 5%;
+    height: 60px;
+    column-count: 3;
+    display: flex;
+    justify-content: space-between;
+    column-gap: 3rem;    
+}   
+#evg-quote-popup .evg-main-footer-cta-btn{  
+    float: right;   
+}   
+#evg-quote-popup .evg-main-footer-cancel-btn{     
+}
+/* ==========================================================================
+   Error Message
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-error-msg {
+    color: #ff0000;
+    font-size: 1rem;
+}
+
+
+
+
+/* ==========================================================================
+   Style
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-style-bg.evg-light-on-dark {
+    background-color: #343a40;
+}
+
+
+
+
+#evg-quote-popup .evg-style-bg.evg-dark-on-light {
+    background-color: #fff;
+}
+
+
+
+
+#evg-quote-popup .evg-style-text.evg-light-on-dark {
+    color: #fff;
+}
+
+
+
+
+#evg-quote-popup .evg-style-text.evg-dark-on-light {
+    color: #343a40;
+}
+
+
+
+
+/* ==========================================================================
+   Visibility
+========================================================================== */
+
+
+
+
+#evg-quote-popup .evg-hide {
+    visibility: hidden;
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+
+
+
+/* ==========================================================================
+   Media Queries
+========================================================================== */
+
+
+
+
+@media screen and (max-height: 500px) {
+    #evg-quote-popup .evg-popup {
+        height: 500px;
+        border-radius: 20px;
+    }
+}
+
+
+
+
+@media screen and (max-width: 575px) {
+#evg-quote-popup .evg-popup {
+        width: 80%;
+        max-width: 500px;
+        border-radius: 20px;
+        height: auto;
+    }
+
+
+    #evg-quote-popup .evg-h1.evg-display-4 {
+        font-size: 22px;
+        margin-top: 50px;
+    }
+
+
+
+
+    #evg-quote-popup .evg-h2 {
+        font-size: 16px;
+    }
+#evg-quote-popup .evg-btn {
+    min-height: 2rem;
+}
+
+
+    #evg-quote-popup .evg-btn-lg {
+        font-size: 16px;
+        padding: .8rem 2rem; 
+        height: 42px;
+    } 
+
+
+    #evg-quote-popup .evg-btn-lg {
+        font-size: 16px;
+        padding: .8rem 2rem; 
+        height: 42px;
+    } 
+
+
+    #evg-quote-popup .evg-error-msg,
+    #evg-quote-popup .evg-opt-out-msg {
+        font-size: 16px;
+        padding: .8rem 2rem;
+    }
+
+
+
+
+    #evg-quote-popup .evg-main-footer-div {
+    width: 100%;
+    position: initial;
+    bottom: 10%;
+    left: 5%;
+    height: auto; 
+    /* column-count: 3; */
+    display: flex;
+    column-gap: 3rem;
+    flex-direction: column-reverse;
+    justify-content: center;
+    text-align: center;
+    }
+    #evg-quote-popup .evg-main-footer-cancel-btn,
+    #evg-quote-popup .evg-main-footer-cta-btn {
+        float: none;
+    }
+    #evg-quote-popup .evg-main-footer-cta-btn {
+        margin-top: 10px;
+    }
+    #evg-quote-popup .evg-opt-out-msg {
+        margin-top: 10px;
+    }
+    #evg-quote-popup .evg-main-content-div {
+        width: 100%;
+        padding-bottom: 20px; 
+    }
+    #evg-quote-popup .evg-main-image-div {
+        display: none; 
+    }
+}
+@media screen and (max-width: 345px) {
+    #evg-quote-popup .evg-opt-out-msg {
+        margin-top: 10px;
+    }
+    #evg-quote-popup .evg-main-footer-cancel-btn,
+    #evg-quote-popup .evg-main-footer-cta-btn {
+        float: none;
+    }
+    #evg-quote-popup .evg-main-footer-div {
+        position: relative;
+        height: 85px;
+    }
+     #evg-quote-popup .evg-popup {
+        height: auto;
+    }
+}
+
+
+/* Additional content styling */
+#evg-quote-popup #evg-additional-content {
+    width: 100%;
+    padding: 20px;
+    text-align: left;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+#evg-quote-popup .evg-additional-content-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+#evg-quote-popup .evg-content-text {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+
+/* Ensure the hide class works properly */
+#evg-quote-popup .evg-hide {
+    display: none !important;
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+          </template>
+        </div>
+
+                <div class="subsection">
+          <p class="subsection-label">JS</p>
+          <pre><code id="code-tmpl-js"></code></pre>
+          <template id="tmpl-tmpl-js"> // js
+
+(function() {
+
+
+
+
+    const pageExitMillis = 100;
+
+
+
+
+    /**
+     * @function buildBindId
+     * @param {Object} context
+     * @description Create unique bind ID based on the campaign and experience IDs.
+     */
+    function buildBindId(context) {
+        return `${context.campaign}:${context.experience}`;
+    }
+
+
+
+
+    /**
+     * @function setConfirmationPanel
+     * @description Add click listener to the Call-To-Action button that validates the user email address,
+     * shows the Confirmation Panel, removes dismissal tracking from the "X" button and overlay, and sends
+     * an event to Interaction Studio to set the emailAddress attribute to the user email address.
+     */
+    function setConfirmationPanel() {
+        SalesforceInteractions.cashDom("#evg-quote-popup .evg-error-msg")
+                    .removeClass("evg-hide")
+                    .addClass("evg-error");
+    }
+
+
+
+
+    /**
+     * @function setDismissal
+     * @param {Object} context
+     * @description Add click listener to the overlay, "X" button, and opt-out text that removes the
+     * template from the DOM.
+     */
+    function setDismissal(context) {
+        const dismissSelectors = `
+            #evg-quote-popup .evg-overlay,
+            #evg-quote-popup .evg-btn-dismissal,
+            #evg-quote-popup .evg-opt-out-msg,
+            #evg-quote-popup #finalCTA
+        `;
+
+
+
+
+        SalesforceInteractions.cashDom(dismissSelectors).on("click", () => {
+            SalesforceInteractions.cashDom("#evg-quote-popup").remove();
+            /* sessionStorage.setItem("isPopupClosed", "true"); */
+            SalesforceInteractions.sendEvent({
+                        interaction: {
+                            name: "Quote Popup - Wealth Opportunity Request Dismissal"
+                        }
+                    });
+        });
+    }
+
+
+
+
+    /**
+     * @function setSlideNavigation
+     * @description Add click listeners for slide navigation
+     */
+    function setSlideNavigation() {
+        // Navigate from slide 1 to slide 2
+        SalesforceInteractions.cashDom("#evg-quote-popup #nextToSlide2").on("click", () => {
+            console.log("Moving to slide 2");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-1").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").removeClass("evg-hide");
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Moved to Slide 2"
+                }
+            });
+        });
+
+
+        // Final CTA action
+        SalesforceInteractions.cashDom("#evg-quote-popup #remindmelater").on("click", () => {
+            console.log("Remind Me Later CTA clicked");
+            SalesforceInteractions.cashDom("#evg-quote-popup").remove();
+            // Add your final action here (e.g., redirect, form submission, etc.)
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Remind Me Later Wealth Selected"
+                }
+            });
+        });       
+        // Navigate from slide 2 back to slide 1
+        SalesforceInteractions.cashDom("#evg-quote-popup #prevToSlide1").on("click", () => {
+            console.log("Moving back to slide 1");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-1").removeClass("evg-hide");
+        });
+        
+        // Navigate from slide 2 to slide 3
+        SalesforceInteractions.cashDom("#evg-quote-popup #nextToSlide3").on("click", () => {
+            console.log("Moving to slide 3");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-3").removeClass("evg-hide");
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Moved to Slide 3"
+                }
+            });
+        });
+        
+        // Navigate from slide 3 back to slide 2
+        SalesforceInteractions.cashDom("#evg-quote-popup #prevToSlide2").on("click", () => {
+            console.log("Moving back to slide 2");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-3").addClass("evg-hide");
+            SalesforceInteractions.cashDom("#evg-quote-popup #evg-slide-2").removeClass("evg-hide");
+        });
+        
+        // Final CTA action
+        SalesforceInteractions.cashDom("#evg-quote-popup #nextToSlide2").on("click", () => {
+            console.log("Request a call CTA clicked");
+            // Add your final action here (e.g., redirect, form submission, etc.)
+            
+            SalesforceInteractions.sendEvent({
+                interaction: {
+                    name: "Quote Popup - Wealth Opportunity Request Clicked"
+                }
+            });
+        });
+    }
+
+
+
+
+    function apply(context, template) {
+        if (!context.contentZone) return;
+
+
+        /**
+         * The pageElementLoaded method waits for the html element to be loaded before rendering the content template.
+         *
+         * Visit the Template Display Utilities documentation to learn more:
+         * https://developer.evergage.com/campaign-development/web-templates/web-display-utilities
+         */
+        return SalesforceInteractions.DisplayUtils
+            .bind(buildBindId(context))
+            .pageElementLoaded('body')
+            .then(() => {
+                if (SalesforceInteractions.cashDom("#evg-exit-intent-popup").length > 0) return;
+                const html = template(context);
+                SalesforceInteractions.cashDom("body").append(html);
+                setConfirmationPanel();
+                setDismissal(context);
+                setSlideNavigation(); // Replace setCTAAction with setSlideNavigation
+            });
+    }
+
+
+
+
+    function reset(context, template) {
+        SalesforceInteractions.DisplayUtils.unbind(buildBindId(context));
+        SalesforceInteractions.cashDom("#evg-quote-popup").remove();
+    }
+
+
+
+
+    function control(context) {
+        return SalesforceInteractions.DisplayUtils
+            .bind(buildBindId(context))
+            .pageElementLoaded('body') 
+            .then(() => {
+                if (context.contentZone) return true;
+            });
+    }
+
+
+
+
+     
+
+
+
+
+    registerTemplate({
+        apply: apply,
+        reset: reset,
+        control: control
+    });
+
+
+
+
+
+
+
+
+})();
+
+          </template>
+        </div>
+
+                       <div class="subsection">
+          <p class="subsection-label">SSJS</p>
+          <pre><code id="code-tmpl-ssjs"></code></pre>
+          <template id="tmpl-tmpl-ssjs"> // ssjs
+
+export class StyleField {
+    label: string;
+    className: string;
+}
+
+
+export class ExitIntentPopupWithEmailCapture implements CampaignTemplateComponent {
+
+
+    @header("Pop-Up Type")
+
+
+    lightbox: boolean = true;
+
+
+
+
+    /*@title("Background Image URL")
+    imageUrl: string = "";
+    */
+    @subtitle("Define header and subheader text styling.")
+    
+    header: string = "Let’s talk about building your wealth";
+
+
+    @subtitle("Optional text field")
+    subheader1: string = "Our financial representative can help you:";
+    @subtitle("Optional text field")
+    subheader2: string = "Build a customized investment portfolio";
+    @subtitle("Optional text field")
+    subheader3: string = "Create a personalized investment strategy ";
+
+
+    @title("Aria Label Cancel Button")
+    @subtitle("Define Aria Label for Cancel Button")
+    cancelbtn: string = "cancel button";
+
+
+    @title("Aria Label Close Button")
+    @subtitle("Define Aria Label for Close Button")
+    closebtn: string = "close";
+
+
+    @title("Aria Label for Pop Up Closed")
+    @subtitle("Define Aria Label for Pop Up Closed")
+    popupclosedtext: string = "Ready for quote pop-up modal is closed";
+
+
+     @title("Aria Label for Skip to Search")
+    @subtitle("Define Aria Label for Skip to Search")
+    skiptosearch: string = "Skip to Search";
+
+
+    @title("CTA Text")
+    ctaText: string = "Request a call";
+    
+    @title("Remind Me Later")
+    remindmelater: string = "Request a call";
+
+
+    @title("CTA Destination URL")
+    @subtitle("Requires full URL string including https://")
+    ctaUrl: string = "https://www.REDACT.ca/en/financial-representative";
+
+
+    @title("Opt-Out Text")
+    @subtitle("Clicking this text closes the pop-up.")
+    optOutText: string = "No Thanks";
+
+
+/* Second Slide */
+    @subtitle("SECOND SLIDE HEADER")
+    header2: string = "Thanks! We’ll be in touch";
+    @subtitle("SECOND SLIDE SUBHEADER")
+    subheader4: string = "A financial representative will call you in the next two days. ";
+    @title("CTA Text")
+    closectaText: string = "Close";
+
+
+    run(context: CampaignComponentContext) {
+        return {};
+    }
+
+
+}
+
+          </template>
+        </div>
         <div class="screenshots">
           <!-- <img src="assets/images/screenshot1.png" alt="Screenshot 1"> -->
         </div>
@@ -372,9 +2377,9 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
                      });
                  }),
                 //To track clicks on the app download buttons in the footer.
-                // "img[src^='/-/media/coopertors/app-link/appstorebadge']"
-                //is(img[src|='/-/media/coopertors/app-link/appstorebadgeen.svg'],img[src|='/-/media/coopertors/app-link/appstorebadgefr.png'])
-                SalesforceInteractions.listener("click", "img[src^='/-/media/coopertors/app-link/appstorebadge']", () => {
+                // "img[src^='/-/media/REDACT/app-link/appstorebadge']"
+                //is(img[src|='/-/media/REDACT/app-link/appstorebadgeen.svg'],img[src|='/-/media/REDACT/app-link/appstorebadgefr.png'])
+                SalesforceInteractions.listener("click", "img[src^='/-/media/REDACT/app-link/appstorebadge']", () => {
                     SalesforceInteractions.sendEvent({
                         interaction: { name: "App Download Footer Button Click" }
                     });
@@ -2540,9 +4545,9 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
                 }),
                 
                 //To track clicks on the app download buttons in the footer.
-                // "img[src^='/-/media/coopertors/app-link/appstorebadge']"
-                //is(img[src|='/-/media/coopertors/app-link/appstorebadgeen.svg'],img[src|='/-/media/coopertors/app-link/appstorebadgefr.png'])
-                SalesforceInteractions.listener("click", "img[src^='/-/media/coopertors/app-link/appstorebadge']", () => {
+                // "img[src^='/-/media/REDACT/app-link/appstorebadge']"
+                //is(img[src|='/-/media/REDACT/app-link/appstorebadgeen.svg'],img[src|='/-/media/REDACT/app-link/appstorebadgefr.png'])
+                SalesforceInteractions.listener("click", "img[src^='/-/media/REDACT/app-link/appstorebadge']", () => {
                     SalesforceInteractions.sendEvent({
                         interaction: { name: "App Download Footer Button Click" }
                     });
@@ -2759,6 +4764,65 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
       </div>      
 
     </div>
+
+    <script>
+      // Copy template HTML into code blocks
+      document.querySelectorAll('template[id^="tmpl-"]').forEach(function(tmpl) {
+        var codeEl = document.getElementById(tmpl.id.replace('tmpl-', 'code-'));
+        if (codeEl) codeEl.textContent = tmpl.innerHTML;
+      });
+
+      // Collapsible projects — start all collapsed
+      document.querySelectorAll('.project').forEach(function(project) {
+        var titleEl = project.querySelector('.project-title');
+        if (!titleEl) return;
+
+        // Build toggle button
+        var btn = document.createElement('button');
+        btn.className = 'toggle-btn';
+        btn.setAttribute('aria-label', 'Toggle section');
+        btn.textContent = '▶';
+
+        // Wrap button + title in a clickable header row
+        var header = document.createElement('div');
+        header.className = 'project-header';
+        titleEl.parentNode.insertBefore(header, titleEl);
+        header.appendChild(btn);
+        header.appendChild(titleEl);
+
+        // Start collapsed
+        project.classList.add('collapsed');
+
+        header.addEventListener('click', function() {
+          project.classList.toggle('collapsed');
+          btn.textContent = project.classList.contains('collapsed') ? '▶' : '▼';
+        });
+      });
+
+      // Collapsible subsections — start all collapsed
+      document.querySelectorAll('.subsection').forEach(function(sub) {
+        var labelEl = sub.querySelector('.subsection-label');
+        if (!labelEl) return;
+
+        var btn = document.createElement('button');
+        btn.className = 'subsection-toggle-btn';
+        btn.setAttribute('aria-label', 'Toggle subsection');
+        btn.textContent = '▶';
+
+        var header = document.createElement('div');
+        header.className = 'subsection-header';
+        labelEl.parentNode.insertBefore(header, labelEl);
+        header.appendChild(btn);
+        header.appendChild(labelEl);
+
+        sub.classList.add('collapsed');
+
+        header.addEventListener('click', function() {
+          sub.classList.toggle('collapsed');
+          btn.textContent = sub.classList.contains('collapsed') ? '▶' : '▼';
+        });
+      });
+    </script>
   </body>
 </html>
 
