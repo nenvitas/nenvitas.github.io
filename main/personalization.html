@@ -115,10 +115,2506 @@ function example() {
 
       <!-- ── Project 2 ── -->
       <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
+        <p class="project-title">Sitewide JS Work</p>
+        <p class="project-desc">Personalization Sitewide JS code resource</p>
 
-        <pre><code>// paste your code here</code></pre>
+        <pre><code>if (typeof (SalesforceInteractions.mcis.FlickerDefender || {}).setPageMatchTimeout === "function") {
+    SalesforceInteractions.mcis.FlickerDefender.setPageMatchTimeout(2500);
+}
+
+if (typeof (SalesforceInteractions.mcis.FlickerDefender || {}).setRedisplayTimeout === "function") {
+    SalesforceInteractions.mcis.FlickerDefender.setRedisplayTimeout(5000);
+}
+
+const getCookieDomain = () => {
+    //getting the cookie Domain prior to init
+    console.log("getting the cookie Domain prior to init");
+    if (/www.REDACT.ca/.test(window.location.hostname)) {
+        return "www.REDACT.ca";
+    }
+    if (/REDACT.ca/.test(window.location.hostname)) {
+        return "REDACT.ca";
+    }
+    if (/REDACT.ca/.test(window.location.hostname)) {
+        return "REDACT.ca";
+    }
+};
+
+const currentCookieDomain = getCookieDomain();
+
+
+
+SalesforceInteractions.init({                   // Initializes the Interaction Studio Web SDK
+    cookieDomain: "REDACT.ca",             // Optional tracking cookie domain configuration (overrides default)
+    consents: [{
+        purpose: SalesforceInteractions.mcis.ConsentPurpose.Personalization,
+        provider: "Cooperators Consent Manager",
+        status: SalesforceInteractions.ConsentStatus.OptIn
+    }]
+}).then(() => {
+    let href = window.location.href
+    
+  
+  // monitor the url for changes and reinitialize when detected
+   setInterval(() => {
+    if (href !== window.location.href) {
+      href = window.location.href
+       SalesforceInteractions.reinit()
+       console.log('reinitialization occurance'); 
+     }
+   }, 1500) 
+    let locale = '';
+    
+    console.log("Sitemap Init");
+
+    
+    /**
+    * Function to return Locale as en_CA / fr_CA based on the language present in head tag.
+    * @return   {String}     Locale of the page
+    */
+    const buildLocale = () => {
+        locale = SalesforceInteractions.cashDom("html").attr("lang");
+
+
+        console.log('Locale being set ' + locale); 
+        
+        return (locale == "fr" ? "fr_CA" : "en_CA");
+    };
+    
+    /**
+    * Function to convert given string to proper case.
+    * @return   {String}     Locale of the page
+    */
+    String.prototype.toProperCase = function () {
+        return this.replace(/\w\S*/g, function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
+        });
+    };
+
+    /**
+    * Function that checks if meta tag is having a certain value.
+    * @param    {String} meta  Meta tag name to match value
+    * @param    {String} val   Value to be matched 
+    * @return   {bool}         Boolean returned based on whether meta tag content matches a value.   
+    */
+    const matchMetaValue = (meta, val) => {
+        return (SalesforceInteractions.cashDom("meta[name=" + meta + "]").first().attr('content') == val)
+    };
+
+    /**
+    * Function that checks whether the URL matches the given pattern once the meta element for description is loaded.
+    * @param    {String} regex  Regex pattern for URL matching   
+    * @return   {Promise<bool>} A promise for matching URL with given pattern.  
+    */
+    const matchPage = (regex, meta) => {
+        return new Promise((resolve, reject) => {
+            let maxChecks = 10;
+            let currentChecks = 0;
+            let blogCheckInterval = window.setInterval(function () {
+                if (currentChecks === maxChecks) {
+                    window.clearInterval(blogCheckInterval);
+                    reject(new Error("Not on insurance page"));
+                }
+                currentChecks++;
+                let match = meta ? regex.test(SalesforceInteractions.cashDom("meta[name="+meta+"]").first().attr('content')) : regex.test(window.location.href);
+                if (match) {
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html")
+                        ? resolve(true)
+                        : reject(new Error("Not on insurance page"));
+                    window.clearInterval(blogCheckInterval);
+                }
+            }, 50);
+        }).then(() => { return true; }).catch(() => { return false; });
+    };
+
+    const sitemapConfigCoop = {             // Sitemap configuration object
+
+        global: {                       // Object used to contain Global site object configuration
+            locale: buildLocale(),
+            contentZones: [
+                    { name: "global_quote_footer", selector: ".d-flex.gap-1.list-inline.list-unstyled:not(.social-list)" },
+                ],
+            listeners: [
+                                SalesforceInteractions.listener("click", "#okta-signin-submit", () => {
+                     const email = SalesforceInteractions.cashDom("#okta-signin-username").val();
+                     SalesforceInteractions.sendEvent({
+                         interaction: {
+                             name: "Sign In",
+                         },
+                         user: {
+                                 identities: { emailAddress: email }  /*based on this link: https://salesforce-external.slack.com/archives/C01KH8D0F4H/p1653495006264169?thread_ts=1653492525.074709&cid=C01KH8D0F4H*/
+                         }
+                     });
+                 }),
+                //To track clicks on the app download buttons in the footer.
+                // "img[src^='/-/media/coopertors/app-link/appstorebadge']"
+                //is(img[src|='/-/media/coopertors/app-link/appstorebadgeen.svg'],img[src|='/-/media/coopertors/app-link/appstorebadgefr.png'])
+                SalesforceInteractions.listener("click", "img[src^='/-/media/coopertors/app-link/appstorebadge']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "App Download Footer Button Click" }
+                    });
+                }),
+
+                //To track clicks on 'get a quote' buttons for home and auto insurance present on various pages.
+                // SalesforceInteractions.listener("click", "#evg-popup-btn-get-a-quote, #evg-quote-popup, #q-auto-insurance, #q-home-insurance, .callClick, #auto, #home", (event) => {
+                //     event.preventDefault()
+                //     SalesforceInteractions.DisplayUtils.pageElementLoaded('evg-popup-btn-get-a-quote').then((ele)=>{
+                //         SalesforceInteractions.sendEvent({
+                //             interaction: { name: "Clicked Get a Quote" }
+                //         })
+                //     })
+                //     return true
+                // }),
+                
+                SalesforceInteractions.listener("click", "#evg-popup-btn-get-a-quote", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Clicked Get a Quote" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/Cooperators_CG?lang=en']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB home insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/IRAuto_CG?lang=en']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB Auto insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/IRAuto_CG?lang=fr']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB Auto insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/risk/IRAuto_CG?lang=en']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/risk/IRAuto_CG?lang=fr']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/auto/auto-account-holder']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB Auto insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT/TravelInsurance.aspx?pid=2po1fs&lang=en&C=1&checkCookie=true']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Travel Quote button Click" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://www.REDACT.ca/fr-ca/life-insurance-quote.aspx']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Life Quote button Click" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT/TravelInsurance.aspx?pid=2po1fs&lang=fr&C=1&checkCookie=true']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Travel Quote button Click" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://www.REDACT.ca/en/life-insurance-quote.aspx']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Life Quote button Click" }
+                    });
+                }),
+                 SalesforceInteractions.listener("click", "#evg-quote-popup", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Clicked Get a Quote" }
+                    });
+                }),
+                 SalesforceInteractions.listener("click", "#auto", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Clicked Get a Quote" }
+                    });
+                }),
+                 SalesforceInteractions.listener("click", "#home", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Clicked Get a Quote" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='/en/publicpages/get-a-quote']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Clicked Get a Quote" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='/fr-ca/publicpages/get-a-quote']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Clicked Get a Quote" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/Cooperators_CG/?lang=en']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB home insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/IRAuto_CG/?lang=en']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB Auto insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/auto/auto-account-holder']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB Auto insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/Cooperators_CG/?lang=en']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB home insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/Cooperators_CG/?lang=fr']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB home insurance quote clicked" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://www.REDACT.ca/en/financial-representative']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Find a Financial Advisor Click" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://www.REDACT.ca/fr-ca/financial-representative']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Find a Financial Advisor Click" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACTgroupinsurance.ca/quote']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Group Insurance Quote Click" }
+                    });
+                }),
+                SalesforceInteractions.listener("click", "a[href='https://REDACTgroupinsurance.ca/quote?lang=fr']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "Group Insurance Quote Click" }
+                    });
+                }),
+                  SalesforceInteractions.listener("click", ".xds-mega-menu-link-button", () => {
+                   console.log('Mega Menu Click');
+                   
+                   SalesforceInteractions.reinit();
+                }),
+               
+               
+                 //To fetch email from sign in
+                 SalesforceInteractions.listener("click", "#okta-signin-submit", () => {
+                  const email = SalesforceInteractions.cashDom("#okta-signin-usernamel").val();
+                 SalesforceInteractions.sendEvent({
+                         interaction: {
+                            name: "Sign In",
+                         },
+                         user: {
+                                 identities: { emailAddress: email }  /*based on this link: https://salesforce-external.slack.com/archives/C01KH8D0F4H/p1653495006264169?thread_ts=1653492525.074709&cid=C01KH8D0F4H*/
+                         }
+                    });
+                 })
+            ],
+
+            onActionEvent: (actionEvent) => {
+                //To retrieve value for '_hjSessionUser_1576789' or '_hjSession_1576789'  cookie and store as user attribute in IS which may be used in future for profile stitching.
+                const cookieHjSessionId = SalesforceInteractions.mcis.cookie.get('_hjSessionUser_1576789') || SalesforceInteractions.mcis.cookie.get('_hjSession_1576789');
+                const decodedCookieHjSessionId = cookieHjSessionId ? JSON.parse(atob(cookieHjSessionId))['id'] : null;
+                if (decodedCookieHjSessionId) {
+                    actionEvent.user = actionEvent.user || {};
+                    actionEvent.user.attributes = actionEvent.user.attributes || {};
+                    actionEvent.user.attributes.cookieHjSessionId = decodedCookieHjSessionId;
+                }
+
+                //To retrieve value for google analytics user id via '_ga' cookie and set as user attibute. This may be used in future for profile stitching.
+                const gaUID = SalesforceInteractions.mcis.cookie.get('_ga');
+                if (gaUID) {
+                    actionEvent.user = actionEvent.user || {};
+                    actionEvent.user.attributes = actionEvent.user.attributes || {};
+                    actionEvent.user.attributes.cookieGAUID = gaUID;
+                }
+
+                return actionEvent;
+            }
+        },
+
+        pageTypeDefault: {          //Defining default page type for cases when no page types are applicable.
+            name: "default",
+            interaction: {
+                name: "Default"
+            },
+        },
+
+        pageTypes: [           // Array used to contain the page type object configurations
+            {
+                name: "home_" + locale.split('-')[0], // https://REDACT.ca
+                // isMatch: () => /^(\/\b(fr-CA|en).aspx\b$|\/\b(fr-CA|en)\b(\/$|$))$/.test(window.location.pathname),
+                 isMatch: () => (
+                                /^(\/(en|fr-ca)\/personal\/?$)/.test(window.location.pathname)
+                                || (
+                                    window.location.hostname === "www.REDACT.ca"
+                                    && (
+                                    window.location.pathname === "/en/personal"
+                                    || window.location.pathname === "/fr-ca/personal"
+                                    )
+                                )
+                                ),
+                    interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'homepage_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Homepage ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                listeners: [
+                    SalesforceInteractions.listener("click", "#xds44", () => {
+                        // console.log('home banner cta clicked')
+                        SalesforceInteractions.sendEvent({ interaction: { name: "Home Banner Click" } });
+                    }),
+                ],
+                contentZones: [
+                    { name: "insurance_quote_popup" }, 
+                    { name: "home_hero", selector: ".atlas-hero.medium-blue" }, /* CHANGED */
+                    { name: "promo_box", selector: ".col-lg-3.marketing-content" },
+                    { name: "alert_banner", selector: "#xds1.xds-alert.xds-alert-warning.xds-alert-primary" }, /* new selector */
+                    { name: "home_cards", selector: ".image-marketing-card-container.col-size-3.card-orientation-center" },                
+                ]
+                
+            
+            },
+
+{
+                name: "insurance_page_" + locale.split('-')[0], // https://REDACT.ca/en/personal/insurance
+                isMatch: () => matchPage(/\/insurance(?:\?.*)?$/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Insurance_page_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Insurance Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "insurance_page_main_banner", selector: ".atlas-hero.light-blue" }, /* CHANGED */
+                    { name: "tile_selector", selector: ".col-12.higlight-block" }, /* CHANGED */
+                ]
+                
+                
+            },
+
+            {
+                name: "home_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/personal/insurance/home
+                isMatch: () => matchPage(/\insurance\/home(?:\?.*)?$/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Home_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Home Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "home_insurance_product_cta_banner", selector: ".atlas-hero.light-blue" }, /* CHANGED */
+                ]
+            },
+            {
+                name: "home_insurance_article_" + locale.split('-')[0], 
+                isMatch: () => matchPage(/\/insurance\/home\//, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).toProperCase().replaceAll('-', '_') + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Home_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("title", "html").then((content) => {
+                        if (/\/home\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Home Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'home')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Home Insurance Items" }
+                            })
+                        }
+                    }),
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='sub1']", "html").then((content) => {
+                        if (matchMetaValue('sub1', 'home')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Home Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+            {
+                name: "auto_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/personal/insurance/auto
+                isMatch: () => matchPage(/\insurance\/auto(?:\?.*)?$/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Auto_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Auto Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "auto_insurance_product_cta_banner_test_hero_container", selector: ".atlas-hero.light-blue" }, /* CHANGED */
+                ]
+            },
+
+            {
+                name: "auto_insurance_article_" + locale.split('-')[0],
+
+                isMatch: () => matchPage(/insurance\/auto\/(?!recreational-vehicles)/,null),
+
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Auto_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/auto\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Auto Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'auto') || matchMetaValue('coop_sub1', 'q2integrated')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Auto Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+
+
+
+             {
+                name: "business_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/business
+                isMatch: () => matchPage(/\/business$(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Business_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Business Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+            {
+                name: "Business_insurance_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/business\/(?!insurance-quote|vehicle-insurance-quote)/,null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Business_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/business\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Business Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'auto') || matchMetaValue('coop_sub1', 'q2integrated')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Business Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+
+             {
+                name: "business_insurance_quote_" + locale.split('-')[0], // https://REDACT.ca/en/business/insurance-quote
+                isMatch: () => matchPage(/business\/insurance-quote(?:\?.*)?$/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Business_Insurance_quote_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Business Insurance Quote ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+             {
+                name: "business_vehicle_quote_" + locale.split('-')[0], // https://REDACT.ca/en/business/vehicle-insurance-quote
+                isMatch: () => matchPage(/business\/vehicle-insurance-quote(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Business_Vehicle_quote_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Business Vehicle Quote ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+             {
+                name: "thank_you_" + locale.split('-')[0], // https://REDACT.ca/en/thank-you
+                isMatch: () => matchPage(/\/thank-you(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'thank_you_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Thank You ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "thank_you_message", selector: ".content-block-container.natural-2"},
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+/* CHECK WITH DEVS ON STATUS OF THIS PAGE
+{
+                name: "get_started" + locale.split('-')[0],
+                isMatch: () => /\/get-started/.test(window.location.href),
+                
+                interaction: {
+                    name: "Get Started"
+                },
+                listeners: [
+                    SalesforceInteractions.listener("click", "#evg-banner-cta", () => {
+                        console.log('Get Started clicked');
+                        SalesforceInteractions.sendEvent({ interaction: { name: "Get Started Postal Code Entry" } });
+                    })
+                ],
+                contentZones: [
+                    { name: "Get_Stared_banner", selector: ".hero-container.container" },
+                    { name: "Solutions_banner", selector: ".text-block-container.primary"},
+                    { name: "Service_banner", selector: ".feature-spotlight-container"},
+                    { name: "Story_banner", selector: ".content-block-container.primary"},
+                    { name: "Mission_banner", selector: ".text-block-container.natural-2"},
+                    { name: "Postal_CTA_banner", selector: ".advisory-search-container.natural-2"},
+                ],
+            }, 
+     .*/
+
+            {
+                name: "claims_guarantee_" + locale.split('-')[0], // https://REDACT.ca/en/accounts-services/make-a-claim
+                isMatch: () => /\/accounts-services\/make-a-claim/.test(window.location.href),
+                interaction: {
+                    name: 'Claims Page View'
+                },
+                contentZones: []
+            },
+   
+
+ {                 name: "home_and_auto_insurance_discounts_" + locale.split('-')[0], // https://REDACT.ca/en/home-and-auto-insurance-discounts
+                                 isMatch: () => /\/home-and-auto-insurance-discounts/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Bundle_discounts_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Bundle Discounts ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 listeners: [
+                     SalesforceInteractions.listener("click", "#evg-banner-cta", () => {
+                         console.log('Bundle Number clicked');
+                         SalesforceInteractions.sendEvent({ interaction: { name: "Quebec Bundle clicked" } });
+                     })
+                 ],
+                 
+                 contentZones: [
+                     { name: "Bundle_province", selector: ".hero-container.container" },
+                     { name: "Bundle_number", selector: ".content-block-container.natural-2" },
+                    { name: "Bundle_page_header", selector: ".h1" },
+                    { name: "Bundle_page_cta", selector: ".atlas-ctas" },
+                    { name: "Bundle_page_image", selector: ".atlas-image-container" },
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                    
+                     
+                 ],
+
+ 
+             },
+/* CHECK WITH DEVS ON STATUS OF THIS PAGE            
+{
+                name: "savings_and_discounts" + locale.split('-')[0],
+                isMatch: () => /\/how-to-save/.test(window.location.href),
+                
+                interaction: {
+                    name: "Savings and Discounts Page"
+                },
+                listeners: [
+                    SalesforceInteractions.listener("click", "#evg-banner-cta", () => {
+                        console.log('Savings and Discounts Clicked');
+                        SalesforceInteractions.sendEvent({ interaction: { name: "Savings and Discounts Clicked" } });
+                    })
+                ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "savings_and_discounts_main_banner", selector: ".hero-banner-container.hero-banner-variant-l3.hero-banner-image-right" },
+                    { name: "savings_and_discounts_icons_banner", selector: ".content-block-container.primary" },
+                    { name: "savings_and_discounts_phone_banner", selector: ".text-block-container.primary" },
+                ],
+
+ 
+            }, 
+*/
+
+ {
+                name: "rec_vehicles_" + locale.split('-')[0], // https://REDACT.ca/en/personal/insurance/auto/recreational-vehicles
+                isMatch: () => /\/insurance\/auto\/recreational-vehicles?/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Rec_vehicles_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Rec Vehicles Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "rec_vehicles_main_banner", selector: ".hero-banner-container.hero-banner-variant-l3.hero-banner-image-" },
+                    { name: "rec_vehicles_banner_container", selector: ".hero-banner-content" },
+                    { name: "rec_vehicles_terms_and_conditions", selector: "#sfmc-disclaimer-2.body-2.c-secondary" },                    
+                ],
+
+ 
+            },  
+ {
+                name: "rvi_landing_page_" + locale.split('-')[0], // https://www.REDACT.ca/en/recreational-vehicle-insurance
+                isMatch: () => /\/recreational\-vehicle\-insurance/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'rvi_landing_page_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'RVI Landing Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Bundle_page_header", selector: ".h1" },
+                    { name: "rv_hero_container", selector: ".atlas-container.container" }, 
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                    { name: "Bundle_number", selector: ".feature-card-container.col-size-2.card-orientation-center" },
+                ],
+
+ 
+            }, 
+ {
+                name: "motorcycle_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/recreational-vehicles/motorcycle-insurance
+                isMatch: () => /\/recreational\-vehicles\/motorcycle\-insurance/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Motorcycle_insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Motorcycle Insurance Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Bundle_page_header", selector: ".h1" },
+                    { name: "rv_hero_container", selector: ".atlas-container.container" }, 
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                    { name: "Bundle_number", selector: ".feature-card-container.col-size-2.card-orientation-center" },
+                ],
+
+ 
+            }, 
+
+ {
+                name: "snowmobile_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/recreational-vehicles/snowmobile-insurance
+                isMatch: () => /\/recreational\-vehicles\/snowmobile\-insurance/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'snowmobile_insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Snowmobile Insurance Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Bundle_province", selector: ".hero-container.container" },
+                    { name: "Bundle_number", selector: ".feature-card-container.col-size-2.card-orientation-center" },
+                    { name: "Bundle_page_header", selector: ".display-2" },
+                    { name: "Bundle_page_cta", selector: ".hero-banner-cta" },
+                    { name: "Bundle_page_image", selector: ".hero-banner-image-container" },
+                    { name: "terms_and_conditions", selector: "#sfmc-disclaimer" },
+                ],
+
+ 
+            },  
+
+ {
+                name: "atv_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/recreational-vehicles/atv-insurance
+                isMatch: () => /\/recreational\-vehicles\/atv\-insurance/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'atv_insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'ATV Insurance Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Bundle_page_header", selector: ".h1" },
+                    { name: "rv_hero_container", selector: ".atlas-container.container" }, 
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                    { name: "Bundle_number", selector: ".feature-card-container.col-size-2.card-orientation-center" },
+                ],
+
+ 
+            },  
+
+ {
+                name: "trailer_camper_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/recreational-vehicles/trailer-camper-insurance
+                isMatch: () => /\/recreational\-vehicles\/trailer\-camper\-insurance/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'trailer_camper_insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Trailer Camper Insurance Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Bundle_province", selector: ".hero-container.container" },
+                    { name: "Bundle_number", selector: ".feature-card-container.col-size-2.card-orientation-center" },
+                    { name: "Bundle_page_header", selector: ".display-2" },
+                    { name: "Bundle_page_cta", selector: ".hero-banner-cta" },
+                    { name: "Bundle_page_image", selector: ".hero-banner-image-container" },
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                ],
+
+ 
+            },  
+
+
+ {                 name: "home_insurance_discounts_" + locale.split('-')[0], // https://REDACT.ca/en/home-insurance-discounts
+                                 isMatch: () => /\/home-insurance-discounts/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'home_only_insurance_discounts_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Home Discounts ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 listeners: [
+                     SalesforceInteractions.listener("click", "#evg-banner-cta", () => {
+                         console.log('Home Number clicked');
+                         SalesforceInteractions.sendEvent({ interaction: { name: "Home number clicked" } });
+                     })
+                 ],
+                 contentZones: [
+                    { name: "home_discounts_province", selector: ".hero-container.container" },
+                    { name: "home_discounts_number", selector: ".content-block-container.natural-2" },
+                    { name: "home_discounts_page_header", selector: ".h1" },
+                    { name: "home_discounts_page_header_content", selector: ".atlas-content > .body-1" },
+                    { name: "home_discounts_page_cta", selector: ".atlas-ctas" },
+                    { name: "home_discounts_page_image", selector: ".atlas-image-container" },
+                    { name: "home_discounts_body", selector: ".body-content" },
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                    { name: "sticky_nav", selector: ".discount-canvas" },                    
+                 ],
+
+ 
+             },
+             
+{                 name: "commercial_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/commercial-insurance
+                                 isMatch: () => /\/commercial-insurance(?:\?.*)?$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Commercial_insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Commercial Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "Bundle_province", selector: ".hero-container.container" },
+                    { name: "Bundle_number", selector: ".content-block-container.natural-2" },
+                    { name: "Bundle_page_header", selector: ".display-2" },
+                    { name: "Bundle_page_cta", selector: ".hero-banner-cta" },
+                    { name: "Bundle_page_image", selector: ".atlas-image-container" },
+                    { name: "terms_and_conditions", selector: ".spotlight-container" },
+                    { name: "commercial_vehicle_insurance", selector: "#xds42" },
+                    { name: "commercial_vehicle_top_button", selector: "#xds36" },
+                    { name: "commercial_vehicle_bottom_button", selector: "#xds37" },
+                    { name: "commercial_vehicle_bottom_page", selector: ".heading-block" },
+                     
+                 ],
+
+ 
+             },
+                
+             {
+                name: "Investment_pages_" + locale.split('-')[0], // https://REDACT.ca/en/personal/investments
+                isMatch: () => matchPage(/\/investments(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Investment_pages_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Investment Pages ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "investment_insurance_quote_popup" },
+                ]
+            },
+                        {
+                name: "Investment_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/investments\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Investment_pages_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "investment_insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/investments\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Investment Page Items" }
+                            });
+                        }
+                    })
+                ]
+            },
+ {                 name: "investments_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/investments-insurance-advice
+                                 isMatch: () => /\/investments-insurance-advice/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Investments_insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Investments Insurance Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "investments_insurance_banner", selector: ".hero-container.container" },
+                 ],
+
+ 
+             },
+            {
+                name: "Resources_pages_" + locale.split('-')[0], // https://REDACT.ca/en/personal/resource-centre
+                isMatch: () => matchPage(/\/resource-centre(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Resources_pages_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Resources Pages ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "investment_insurance_quote_popup" },
+                ]
+            },
+            {
+                name: "Resources_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/resource-centre\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Resources_pages_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "investment_insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/resource-centre\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Resources Page Items" }
+                            });
+                        }
+                    })
+                ]
+            },
+
+            {
+                name: "travel_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/personal/insurance/travel
+                isMatch: () => matchPage(/\/travel(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Travel_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Travel Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "travel_insurance_product_cta_banner_test_col", selector: ".col-right-content" },
+                    { name: "travel_insurance_product_cta_banner_test_hero_container", selector: ".hero-container.container" },
+                ]
+            },
+
+            {
+                name: "travel_insurance_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/travel\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Travel_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/travel\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Travel Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'auto') || matchMetaValue('coop_sub1', 'q2integrated')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Travel Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+
+            {
+                name: "life_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/personal/insurance/life
+                isMatch: () => matchPage(/\/insurance\/life(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Life_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Life Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "life_insurance_product_cta_banner_test_col", selector: ".col-right-content" },
+                    { name: "life_insurance_product_cta_banner_test_hero_container", selector: ".hero-container.container" },
+                ]
+            },
+            
+            {
+                name: "life_insurance_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/insurance\/life\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Life_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/life-insurance\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Life Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'auto') || matchMetaValue('coop_sub1', 'q2integrated')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Life Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+
+            {
+                name: "life_insurance_landing_page_" + locale.split('-')[0], // https://REDACT.ca/en/life-insurance
+                isMatch: () => matchPage(/\/life-insurance(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Life_Insurance_Landing_Page_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Life Insurance Landing Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Life_landing_page_header", selector: ".h1" },
+                ]
+            },
+
+
+            {
+                name: "whole_life_insurance_" + (locale?.split('-')[0] || 'en'), // https://REDACT.ca/en/whole-life-insurance
+                isMatch: () => {
+                    const urlMatched = matchPage(/\/whole-life-insurance(\?.*|#.*)?$/, null);
+                    console.log("Matching URL:", window.location.href, "Result:", urlMatched);
+                    return urlMatched;
+                },
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => {
+                            const generatedId = 'Whole_Life_Insurance_' + (locale?.split('-')[0]?.toUpperCase() || 'EN');
+                            console.log("Generated ID:", generatedId);
+                            return generatedId;
+                        },
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html")
+                                .then((ele) => SalesforceInteractions.resolvers.fromCanonical())
+                                .catch((err) => {
+                                    console.error("Error loading meta tag description:", err);
+                                    return window.location.href; // Fallback to current URL
+                                }),
+                            name: 'Whole Life Insurance ' + (locale?.split('-')[0]?.toUpperCase() || 'EN'),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html")
+                                .then((ele) => SalesforceInteractions.resolvers.fromMeta('description'))
+                                .catch((err) => {
+                                    console.error("Error loading meta description:", err);
+                                    return "Default Description"; // Fallback description
+                                }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Life_landing_page_header", selector: ".display-2" },
+                ],
+
+                        },
+
+            {
+                name: "term_life_insurance_landing_page_" + locale.split('-')[0], // https://REDACT.ca/en/term-life-insurance
+                isMatch: () => matchPage(/\/term-life-insurance(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Term Life_Insurance_Landing_Page_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Term Life Insurance Landing Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Life_landing_page_header", selector: ".display-2" },
+                ]
+            },
+
+            {
+                name: "universal_life_insurance_landing_page_" + locale.split('-')[0], // https://REDACT.ca/en/universal-life-insurance
+                isMatch: () => matchPage(/\/universal-life-insurance(?:\?.*)?$/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Universal_Life_Insurance_Landing_Page_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Universal Life Insurance Landing Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "Life_landing_page_header", selector: ".display-2" },
+                ]
+            },
+
+            
+            {
+                name: "mortgage_landing_page_" + locale.split('-')[0], // https://REDACT.ca/en/mortgage
+                isMatch: () => matchPage(/\/mortgage/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Mortgage_Landing_Page_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Mortgage Landing Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "mortgage_landing_page_header", selector: ".display-2" },
+                ]
+            },
+
+            {
+                name: "farm_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/farm
+                isMatch: () => matchPage(/\/$farm/, null) /*||, matchPage(/\bInsurance\b/,'coop_section')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Farm_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Farm Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "farm_insurance_product_cta_banner_test_col", selector: ".col-right-content" },
+                    { name: "farm_insurance_product_cta_banner_test_hero_container", selector: ".hero-container.container" },
+                ]
+            },
+
+            {
+                name: "farm_insurance_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/farm\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Farm_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/farm\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Farm Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'auto') || matchMetaValue('coop_sub1', 'q2integrated')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Farm Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+            {
+                name: "group_insurance_" + locale.split('-')[0], // https://REDACT.ca/en/group
+                isMatch: () => /\/group(?:\?.*)?$/.test(window.location.href), /*||, matchPage(/\bInsurance\b/,'coop_section')*/
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Group_Insurance_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Insurance ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "group_insurance_product_cta_banner_test_col", selector: ".col-right-content" },
+                    { name: "group_insurance_product_cta_banner_test_hero_container", selector: ".hero-container.container" },
+                ]
+            },
+            {
+                name: "group_insurance_sub_" + locale.split('-')[0], // https://REDACT.ca/en/group/home-auto
+                isMatch: () => /\/group\/home-auto\/?$/.test(window.location.href), /*||, matchPage(/\bInsurance\b/,'coop_section')*/
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Group_Insurance_sub_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Insurance Sub ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "group_insurance_product_cta_banner_test_col", selector: ".col-right-content" },
+                    { name: "group_insurance_product_cta_banner_test_hero_container", selector: ".hero-container.container" },
+                    { name: "group_tiles", selector: ".icon-marketing-card-container.col-size-2.card-orientation-left"},
+                ]
+            },
+            {
+                name: "group_insurance_auto_" + locale.split('-')[0], // https://REDACT.ca/en/group/home-auto/auto-insurance-for-members
+                isMatch: () => /\/group\/home-auto\/auto-insurance-for-members(?:\?.*)?$/.test(window.location.href), /*||, matchPage(/\bInsurance\b/,'coop_section')*/
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Group_Insurance_Auto_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Insurance Auto ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "group_insurance_product_cta_banner_test_col", selector: ".col-right-content" },
+                    { name: "group_insurance_product_cta_banner_test_hero_container", selector: ".hero-container.container" },
+                    { name: "group_tiles", selector: ".icon-marketing-card-container.col-size-2.card-orientation-left"},
+                    { name: "body_content", selector: ".body-content"},
+                ]
+            },
+            {
+                name: "group_insurance_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/group\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Group_Insurance_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/group\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Group Insurance Items" }
+                            });
+                        }
+                    })/*
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='coop_sub1']", "html").then((content) => {
+                        if (matchMetaValue('coop_sub1', 'auto') || matchMetaValue('coop_sub1', 'q2integrated')) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Group Insurance Items" }
+                            })
+                        }
+                    })*/
+                ]
+            },
+ {                 name: "preferred_partners_" + locale.split('-')[0], // https://REDACT.ca/en/preferred-partners
+                                 isMatch: () => /\/preferred-partners/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Preferred_partners_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Bundle Discounts ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 listeners: [
+                     SalesforceInteractions.listener("click", "#evg-banner-cta", () => {
+                         console.log('Phone Number clicked');
+                         SalesforceInteractions.sendEvent({ interaction: { name: "Phone Number clicked" } });
+                     })
+                 ],
+                 
+                 contentZones: [
+                    { name: "Preferred_province", selector: ".atlas-hero.medium-blue" },
+                    { name: "Preferred_number", selector: ".text-block-container.natural-2" },
+                    { name: "Preferred_page_mega_menu", selector: "nav.xds-mega-menu-tertiary" },
+                    { name: "Preferred_page_extra_text", selector: "#target-container" },
+                    { name: "Preferred_page_header_menu", selector: "#xds29" },
+                    
+                     
+                 ],
+
+ 
+             },
+
+ {
+                name: "get_a_quote_" + locale.split('-')[0], // https://REDACT.ca/en/accounts-services/get-quote
+                isMatch: () => /get-quote/.test(window.location.href),
+                
+ interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'Get_A_Quote_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Get a Quote Page ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "body_content", selector: ".body-content" },
+                ],
+ },
+
+  {                 name: "group_advisor_resources_" + locale.split('-')[0], // https://REDACT.ca/en/advisors/life-insurance
+                                 isMatch: () => /\/advisors\/life-insurance$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_advisor_resources_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Advisor Resources ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+
+  {                 name: "group_advisor_services_" + locale.split('-')[0], // https://REDACT.ca/en/advisors
+                                 isMatch: () => /\/advisors$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_advisor_services_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Advisor services ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+
+  {                 name: "group_retirement_resources_" + locale.split('-')[0], // https://REDACT.ca/en/advisors/group-retirement-savings
+                                 isMatch: () => /\/advisors\/group-retirement-savings$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_retirement_resources_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Retirement Resources ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+
+  {                 name: "group_retirement_plan_sponsor_resources_" + locale.split('-')[0], // https://www.REDACT.ca/en/group/retirement-savings/plan-sponsor-resources
+                                 isMatch: () => /\/retirement-savings\/plan-sponsor-resources$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_retirement_plan_sponsor_resources_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Retirement Plan Sponsor Resources ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+
+{                 name: "group_benefits_plan_sponsor_resources_" + locale.split('-')[0], // https://www.REDACT.ca/en/group/benefits/plan-sponsor-resources
+                    isMatch: () => /\/benefits\/plan-sponsor-resources$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_benefits_plan_sponsor_resources_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Benefits Plan Sponsor Resources ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+
+{                 name: "group_benefits_advisor_resources_" + locale.split('-')[0], // https://REDACT.ca/en/advisors/group-benefits
+                    isMatch: () => /\/advisors\/group-benefits$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_benefits_advisor_resources_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Benefits Advisor Resources ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+{                 name: "group_benefits_products_and_services_" + locale.split('-')[0], // https://www.REDACT.ca/en/group/benefits/plan-sponsor-resources/products-services
+                    isMatch: () => /\/plan-sponsor-resources\/products-services$/.test(window.location.href),
+                
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'group_benefits_products_and_services_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: 'Group Benefits Products And Services ' + locale.split('-')[0].toUpperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        }
+                    }
+                },
+                 
+                 contentZones: [
+                    { name: "contact_form_sub", selector: ".form-desc" },
+                    ],
+             },
+//**OLS based Page Types
+             {
+                name: "OLS_sign_in_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SSLPages/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_sign_in_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Sign in' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+
+            {
+                name: "OLS_mainpage_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/home$/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_mainpage_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Main page ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "money_tile", selector: 'xds-tile[image="./assets/images/money.svg"].xds-tile-link.xds-tile-responsive' }
+                ]
+            },
+
+
+            {
+                name: "OLS_my_documents_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/my-documents.aspx/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_my_documents_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS My Documents ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+            {
+                name: "OLS_billing_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/billing/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_billing_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Billing ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+            {
+                name: "OLS_payment_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/Make-a-payment.aspx/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_payment_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Make a payment ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+            {
+                name: "OLS_my_preferences_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/my-preferences.aspx/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_my_preferences_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS My Preferences ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+            {
+                name: "OLS_auto_policy_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/auto-policy.aspx/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_auto_policy_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Auto Policy ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+           /* {
+                name: "OLS_home_policy_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/home-policy.aspx/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_home_policy_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Home Policy ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            }, */
+
+{
+                name: "OLS_claims_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/SecurePages\/claims/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'ols_claims_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'OLS Claims ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ]
+            },
+
+//  {
+//                 name: "claims_guarantee_" + locale.split('-')[0],
+//                 isMatch: () => /\/claims-guarantee/.test(window.location.href) /*||, matchPage(/\bhave-an-insurance-concern\b/,'coop_section')*/,
+//                 interaction: {
+//                     name: 'Claims Guarantee Page View'
+//                 },
+//                 contentZones: [],
+
+// },
+
+
+        ]
+    };
+
+    const sitemapConfigNQB = {             // Sitemap configuration object
+
+        global: {                       // Object used to contain Global site object configuration
+            locale: buildLocale(),
+            contentZones: [],
+            listeners: [
+                
+                  //src="/assets/hi-rez-home.svg" - Enter the home quote flow
+             
+                  SalesforceInteractions.listener("click", "coop-image-button[src='/assets/hi-rez-home.svg']", () => {
+                   console.log('NQB home insurance quote clicked');
+                   
+                   //SalesforceInteractions.reinit();
+                      //SalesforceInteractions.initSitemap(quotingConfig); 
+                      //SalesforceInteractions.initSitemap(sitemapConfig);  
+
+                   
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB home insurance quote clicked" }
+                    });
+                }),
+
+                
+                
+                //src="/assets/hi-rez-auto.svg" - Enter the Auto quote flow
+                
+                  SalesforceInteractions.listener("click", "coop-image-button[src='/assets/hi-rez-auto.svg']", () => {
+                   console.log('NQB Auto insurance quote clicked');
+                   
+                   //SalesforceInteractions.reinit();
+                      //SalesforceInteractions.initSitemap(quotingConfig); 
+                      //SalesforceInteractions.initSitemap(sitemapConfig);  
+
+                   
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB Auto insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", "coop-image-button[src='/assets/rec-veh.svg']", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", ".image-box.atv-image", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", ".image-box.snowmobile-image", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", ".image-box.trailer-image", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", ".image-box.motorcycle-image", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", ".image-box.moped-image", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+
+                  SalesforceInteractions.listener("click", ".image-box.off-road.dirt.bike-image", () => {
+                   console.log('NQB RV insurance quote clicked');
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB RV insurance quote clicked" }
+                    });
+                }),
+                 //button.btn-primary - continuing  the quote flow after the first page applies to all 3 quote types - which type can be determined from first page
+                
+                  SalesforceInteractions.listener("click", "button.btn-primary", () => {
+                   console.log('NQB quote first product line page complete attempt (if no input errors first page completes)');
+                   
+                  
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "NQB quote first product line page complete attempt (if no input errors first page completes)" }
+                    });
+                }),
+                
+                //To track clicks on the language toggle on NQB and to reinitialize the sitemap when lang toggled
+                  SalesforceInteractions.listener("click", "a[aria-label='Passer à la version anglaise']", () => {
+                   console.log('English toggle clicked attempting to reinitialize');
+                   buildLocale(),
+                   SalesforceInteractions.reinit();
+                      //SalesforceInteractions.initSitemap(quotingConfig); 
+                      //SalesforceInteractions.initSitemap(sitemapConfig);  
+
+                   
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "English Toggle Click" }
+                    });
+                }),
+
+                //To track clicks on the language toggle on NQB
+                SalesforceInteractions.listener("click", "a[aria-label='Select French language.']", () => {
+                   console.log('French toggle clicked reinitializing');
+                  buildLocale(),
+                  SalesforceInteractions.reinit();
+                  
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "French Toggle Click" }
+                    });
+                }),
+                
+                //To track clicks on the app download buttons in the footer.
+                // "img[src^='/-/media/coopertors/app-link/appstorebadge']"
+                //is(img[src|='/-/media/coopertors/app-link/appstorebadgeen.svg'],img[src|='/-/media/coopertors/app-link/appstorebadgefr.png'])
+                SalesforceInteractions.listener("click", "img[src^='/-/media/coopertors/app-link/appstorebadge']", () => {
+                    SalesforceInteractions.sendEvent({
+                        interaction: { name: "App Download Footer Button Click" }
+                    });
+                })
+
+            ],
+
+            onActionEvent: (actionEvent) => {
+                //To retrieve value for '_hjSessionUser_1576789' or '_hjSession_1576789'  cookie and store as user attribute in IS which may be used in future for profile stitching.
+                const cookieHjSessionId = SalesforceInteractions.mcis.cookie.get('_hjSessionUser_1576789') || SalesforceInteractions.mcis.cookie.get('_hjSession_1576789');
+                const decodedCookieHjSessionId = cookieHjSessionId ? JSON.parse(atob(cookieHjSessionId))['id'] : null;
+                if (decodedCookieHjSessionId) {
+                    actionEvent.user = actionEvent.user || {};
+                    actionEvent.user.attributes = actionEvent.user.attributes || {};
+                    actionEvent.user.attributes.cookieHjSessionId = decodedCookieHjSessionId;
+                }
+
+                //To retrieve value for google analytics user id via '_ga' cookie and set as user attibute. This may be used in future for profile stitching.
+                const gaUID = SalesforceInteractions.mcis.cookie.get('_ga');
+                if (gaUID) {
+                    actionEvent.user = actionEvent.user || {};
+                    actionEvent.user.attributes = actionEvent.user.attributes || {};
+                    actionEvent.user.attributes.cookieGAUID = gaUID;
+                }
+
+                return actionEvent;
+            }
+        },
+
+        pageTypeDefault: {          //Defining default page type for cases when no page types are applicable.
+            name: "default",
+            interaction: {
+                name: "Default"
+            },
+        },
+
+        pageTypes: [           // Array used to contain the page type object configurations
+          
+            {
+                name: "quoter_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/quote/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'quoter_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'Quoter ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+                         SalesforceInteractions.listener("click", 'button[aria-label="Go to the next page"]', () => {
+                         console.log('Quote next button clicked');
+                         SalesforceInteractions.sendEvent({ interaction: { name: "Quote next button clicked" } });
+                     })
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "quoter_ctatext", selector: ".btn.btn-lg.btn-primary.g-continue-button.nav-button.ng-star-inserted" },
+                    { name: "quoter_cta_text_complete", selector: ".btn.btn-lg.btn-primary.g-continue-button.w-100" },
+                    { name: "commercial_hide", selector: ".commercial-block" },  
+                    { name: "auto_hide", selector: ".image-box.auto-image" },  
+                ]
+            },
+            {
+                name: "quoter_sub_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/sub/, null),
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Category",
+                        id: () => 'quoter_sub_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                           url: window.location.href,
+                         // url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                         // return SalesforceInteractions.resolvers.fromCanonical();
+                                
+                         // }),
+                            name: () =>  'Quoter Sub ' + locale.split('-')[0].toUpperCase(),
+                            // description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                // return SalesforceInteractions.resolvers.fromMeta('description');
+                            // }),
+                        }
+                    }
+                },
+                listeners: [
+                         SalesforceInteractions.listener("click", 'button[aria-label="Go to the next page"]', () => {
+                         console.log('Quote next button clicked');
+                         SalesforceInteractions.sendEvent({ interaction: { name: "Quote next button clicked" } });
+                     })
+                    ],
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                    { name: "quoter_ctatext", selector: ".btn.btn-lg.btn-primary.g-continue-button.nav-button.ng-star-inserted" },              
+                ]
+            },
+            {
+                name: "quoter_article_" + locale.split('-')[0],
+                isMatch: () => matchPage(/\/quote\//, null) /*||, matchPage(/\bInsurance\b/,'coop_sub1')*/,
+                interaction: {
+                    name: SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject,
+                    catalogObject: {
+                        type: "Article",
+                        id: SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', '_').toProperCase() + '_' + locale.split('-')[0].toUpperCase(),
+                        attributes: {
+                            url: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromCanonical();
+                            }),
+                            name: locale.split('-')[0].toUpperCase() + ' ' + SalesforceInteractions.mcis.getLastPathComponentWithoutExtension(window.location.pathname).replaceAll('-', ' ').toProperCase(),
+                            description: SalesforceInteractions.DisplayUtils.pageElementLoaded("meta[name='description']", "html").then((ele) => {
+                                return SalesforceInteractions.resolvers.fromMeta('description');
+                            }),
+                        },
+                        relatedCatalogObjects: {
+                            Category: () => ['Quoter_article_' + locale.split('-')[0].toUpperCase()]
+                        }
+                    }
+                },
+                contentZones: [
+                    { name: "insurance_quote_popup" },
+                ],
+                listeners: [
+                    SalesforceInteractions.DisplayUtils.pageElementLoaded("head", "html").then((content) => {
+                        if (/\/quote\//.test(window.location.pathname)) {
+                            SalesforceInteractions.sendEvent({
+                                interaction: { name: "Quoter Items" }
+                            });
+                        }
+                    })
+                ]
+            },
+ 
+        ]
+    };
+
+
+ 
+    /*
+        Check for URL change every 10 seconds. If URL has changed, reinitialize beacon and sitemap.
+    */
+   /* const handleSPAPageChange = () => {
+        let url = window.location.href;
+        const urlChangeInterval = setInterval(() => {
+        
+            // console.log("in setInterval url set " + url);
+            // SalesforceInteractions.initSitemap(sitemapConfig);
+   //  SalesforceInteractions.reinit();
+           //console.log("in href " + window.location.href);
+       
+            
+            if (url !== window.location.href) {
+                url = window.location.href;
+                
+                
+                
+            }
+        }, 10000);
+    }
+
+    handleSPAPageChange();
+    
+    */
+
+    if(currentCookieDomain === "REDACT"  ){
+        console.log("about to init NQB sitemap");
+        SalesforceInteractions.initSitemap(sitemapConfigNQB);    // Initializes the Sitemap
+
+    }else {
+        if(currentCookieDomain === "REDACT"   ){
+            console.log("about to init Coop sitemap");
+            SalesforceInteractions.initSitemap(sitemapConfigCoop);    // Initializes the Sitemap
+    
+        }
+        if(currentCookieDomain === "REDACT"   ){
+            console.log("about to init Coop sitemap");
+            SalesforceInteractions.initSitemap(sitemapConfigCoop);    // Initializes the Sitemap
+   
+        }
+}
+ 
+
+   
+   
+});
+
+// Latest
+
+</code></pre>
 
         <div class="screenshots">
           <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
