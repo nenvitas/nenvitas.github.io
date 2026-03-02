@@ -104,7 +104,8 @@
         <p class="project-desc">Short description of what this does.</p>
 
         <pre><code>// HTML
-<!--{{!--
+// HTML
+{{!--
     Web Template to serve for the quote model/popup on the Home and Auto insurance product pages only.
     This template has been adapted from Global Template (Exit Intent Pop-Up with Email Capture) provided by IS. 
     
@@ -131,106 +132,105 @@
 
 
 
-<div id="evg-quote-popup" data-evg-campaign-id="{{campaign}}"
-data-evg-experience-id="{{experience}}" data-evg-user-group="{{userGroup}}" aria-hidden="false" role="alert">
+&amp;lt;div id=&quot;evg-quote-popup&quot; data-evg-campaign-id=&quot;{{campaign}}&quot;
+data-evg-experience-id=&quot;{{experience}}&quot; data-evg-user-group=&quot;{{userGroup}}&quot; aria-hidden=&quot;false&quot; role=&quot;alert&quot;&amp;gt;
 
 
 
 
     {{#if lightbox}}
-        <div class="evg-overlay" data-evg-dismissal></div>
+        &amp;lt;div class=&quot;evg-overlay&quot; data-evg-dismissal&amp;gt;&amp;lt;/div&amp;gt;
     {{/if}}
-    <div class="evg-popup evg-style-bg {{style.className}}" style="background-image:url('{{imageUrl}}')">
-        <div class="evg-main-panel">
-            <button class="evg-btn-dismissal evg-style-text {{style.className}}" id="closeButton"
-                aria-label="{{closebtn}}" tabindex="1" data-evg-dismissal>&times; <span></span></button> 
+    &amp;lt;div class=&quot;evg-popup evg-style-bg {{style.className}}&quot; style=&quot;background-image:url('{{imageUrl}}')&quot;&amp;gt;
+        &amp;lt;div class=&quot;evg-main-panel&quot;&amp;gt;
+            &amp;lt;button class=&quot;evg-btn-dismissal evg-style-text {{style.className}}&quot; id=&quot;closeButton&quot;
+                aria-label=&quot;{{closebtn}}&quot; tabindex=&quot;1&quot; data-evg-dismissal&amp;gt;&amp;times; &amp;lt;span&amp;gt;&amp;lt;/span&amp;gt;&amp;lt;/button&amp;gt; 
             
              Slide 1 - Initial Content
-            <div id="evg-slide-1" class="evg-slide">
-                <div class="evg-main-content-wrapper-div">
-                    <div class="evg-main-content-div">
-                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
+            &amp;lt;div id=&quot;evg-slide-1&quot; class=&quot;evg-slide&quot;&amp;gt;
+                &amp;lt;div class=&quot;evg-main-content-wrapper-div&quot;&amp;gt;
+                    &amp;lt;div class=&quot;evg-main-content-div&quot;&amp;gt;
+                        &amp;lt;h1 class=&quot;evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}&quot;&amp;gt;
                         {{~header~}}
-                        </h1>
+                        &amp;lt;/h1&amp;gt;
                         {{#if subheader1}}
-                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                        &amp;lt;p class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;
                             {{~subheader1~}}
-                        </p>
+                        &amp;lt;/p&amp;gt;
                         {{/if}}
                         {{#if subheader2}}
-                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                        &amp;lt;p class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;
                             {{~subheader2~}}
-                        </p>
+                        &amp;lt;/p&amp;gt;
                         {{/if}}
                         {{#if subheader3}}
-                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                        &amp;lt;p class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;
                             {{~subheader3~}}
-                        </p>
+                        &amp;lt;/p&amp;gt;
                         {{/if}}
-                                        <div class="evg-main-footer-div">
-                    <div class="evg-main-footer-cancel-btn">
-                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="remindmelater">
+                                        &amp;lt;div class=&quot;evg-main-footer-div&quot;&amp;gt;
+                    &amp;lt;div class=&quot;evg-main-footer-cancel-btn&quot;&amp;gt;
+                    &amp;lt;button class=&quot;evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text&quot; id=&quot;remindmelater&quot;&amp;gt;
                         {{remindmelater}}
-                    </button>
-                    </div>
-                    <div class="evg-main-footer-cta-btn">
-                        <button class="evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="nextToSlide2" tabindex="3">
+                    &amp;lt;/button&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                    &amp;lt;div class=&quot;evg-main-footer-cta-btn&quot;&amp;gt;
+                        &amp;lt;button class=&quot;evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}&quot; id=&quot;nextToSlide2&quot; tabindex=&quot;3&quot;&amp;gt;
                         {{~ctaText~}}
-                        </button>
-                    </div>
-                </div>
-                    </div>
-                    <div class="evg-main-image-div"><img style="width: 100%;" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Logo">
-</div>
-                </div>
-                </div>
+                        &amp;lt;/button&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                &amp;lt;/div&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                    &amp;lt;div class=&quot;evg-main-image-div&quot;&amp;gt;&amp;lt;img style=&quot;width: 100%;&quot; src=&quot;https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png&quot; alt=&quot;Family in Logo&quot;&amp;gt;
+&amp;lt;/div&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;/div&amp;gt;
             
             Slide 2 - Additional Content
-            <div id="evg-slide-2" class="evg-slide evg-hide">
-                <div class="evg-main-content-wrapper-div">
-                    <div class="evg-main-content-div">
-                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
+            &amp;lt;div id=&quot;evg-slide-2&quot; class=&quot;evg-slide evg-hide&quot;&amp;gt;
+                &amp;lt;div class=&quot;evg-main-content-wrapper-div&quot;&amp;gt;
+                    &amp;lt;div class=&quot;evg-main-content-div&quot;&amp;gt;
+                        &amp;lt;h1 class=&quot;evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}&quot;&amp;gt;
                         {{~header2~}}
-                        </h1>
-                <div class="evg-additional-content-wrapper">
-                    <p class="evg-content-text evg-style-text {{style.className}}">
+                        &amp;lt;/h1&amp;gt;
+                &amp;lt;div class=&quot;evg-additional-content-wrapper&quot;&amp;gt;
+                    &amp;lt;p class=&quot;evg-content-text evg-style-text {{style.className}}&quot;&amp;gt;
                                                 {{~subheader4~}}
-                    </p>
-                </div>
-                <div class="evg-main-footer-div">
-                <div class="evg-slide-nav">
-                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
+                    &amp;lt;/p&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;div class=&quot;evg-main-footer-div&quot;&amp;gt;
+                &amp;lt;div class=&quot;evg-slide-nav&quot;&amp;gt;
+                    &amp;lt;button class=&quot;evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}&quot; id=&quot;finalCTA&quot;&amp;gt;
                                                 {{~closectaText~}}
-                    </button>
-                </div>
-                </div>
-                    </div>
-                                        <div class="evg-main-image-div"><img style="width: 100%;"src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Coops Logo">
-</div>
-                </div>
-            </div>
-            </div>
+                    &amp;lt;/button&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;/div&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                                        &amp;lt;div class=&quot;evg-main-image-div&quot;&amp;gt;&amp;lt;img style=&quot;width: 100%;&quot;src=&quot;https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png&quot; alt=&quot;Family in Coops Logo&quot;&amp;gt;
+&amp;lt;/div&amp;gt;
+                &amp;lt;/div&amp;gt;
+            &amp;lt;/div&amp;gt;
+            &amp;lt;/div&amp;gt;
             Slide 3 - Final Content (can be commented out if not needed)
-            <div id="evg-slide-3" class="evg-slide evg-hide">
-                <div class="evg-additional-content-wrapper">
-                    <h2 class="evg-subheader evg-h2 evg-style-text {{style.className}}">Final Information</h2>
-                    <p class="evg-content-text evg-style-text {{style.className}}">
+            &amp;lt;div id=&quot;evg-slide-3&quot; class=&quot;evg-slide evg-hide&quot;&amp;gt;
+                &amp;lt;div class=&quot;evg-additional-content-wrapper&quot;&amp;gt;
+                    &amp;lt;h2 class=&quot;evg-subheader evg-h2 evg-style-text {{style.className}}&quot;&amp;gt;Final Information&amp;lt;/h2&amp;gt;
+                    &amp;lt;p class=&quot;evg-content-text evg-style-text {{style.className}}&quot;&amp;gt;
                         This is the third slide with final information or a call to action.
-                    </p>
-                </div>
-                <div class="evg-slide-nav">
-                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="prevToSlide2">
+                    &amp;lt;/p&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;div class=&quot;evg-slide-nav&quot;&amp;gt;
+                    &amp;lt;button class=&quot;evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text&quot; id=&quot;prevToSlide2&quot;&amp;gt;
                         Previous
-                    </button>
-                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
+                    &amp;lt;/button&amp;gt;
+                    &amp;lt;button class=&quot;evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}&quot; id=&quot;finalCTA&quot;&amp;gt;
                         Complete
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-  -->
+                    &amp;lt;/button&amp;gt;
+                &amp;lt;/div&amp;gt;
+            &amp;lt;/div&amp;gt;
+        &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
 </code></pre>
 
         <div class="screenshots">
