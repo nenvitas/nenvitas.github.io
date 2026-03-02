@@ -103,10 +103,135 @@
         <p class="project-title">Template Configurations</p>
         <p class="project-desc">Short description of what this does.</p>
 
-        <pre><code>// paste your code here
-function example() {
-  return "hello world";
-}</code></pre>
+        <pre><code>// HTML
+<!--{{!--
+    Web Template to serve for the quote model/popup on the Home and Auto insurance product pages only.
+    This template has been adapted from Global Template (Exit Intent Pop-Up with Email Capture) provided by IS. 
+    
+    Requirements: 
+    1) Set the content zone(s) to that defined in your Sitemap.
+    2) Track clicks on Get a quote CTA.
+
+
+
+
+    Customizations:
+    1) See https://developer.evergage.com/web-integration/sitemap/contentzones for recommended names for content zones
+    mapped via the Sitemap.
+    2) Style options can be changed in Serverside Code.
+    3) Styling of the Style options, including fallback background color, can be changed in CSS.
+    4) Remove or change the default values for the configuration properties in Serverside Code.
+    5) Media query breakpoints can be changed in CSS.
+    6) To support rich text, add the @richtext(true) decorator to configuration properties in Serverside Code.
+    Handlebars expressions for these properties must be wrapped in three sets of curly braces (e.g. {{{expression}}} ).
+    7) Change the value of the aria-label attributes as necessary.
+    8) Change the error message in the .evg-error-msg. Styling can be changed in CSS.
+--}} 
+
+
+
+
+<div id="evg-quote-popup" data-evg-campaign-id="{{campaign}}"
+data-evg-experience-id="{{experience}}" data-evg-user-group="{{userGroup}}" aria-hidden="false" role="alert">
+
+
+
+
+    {{#if lightbox}}
+        <div class="evg-overlay" data-evg-dismissal></div>
+    {{/if}}
+    <div class="evg-popup evg-style-bg {{style.className}}" style="background-image:url('{{imageUrl}}')">
+        <div class="evg-main-panel">
+            <button class="evg-btn-dismissal evg-style-text {{style.className}}" id="closeButton"
+                aria-label="{{closebtn}}" tabindex="1" data-evg-dismissal>&times; <span></span></button> 
+            
+             Slide 1 - Initial Content
+            <div id="evg-slide-1" class="evg-slide">
+                <div class="evg-main-content-wrapper-div">
+                    <div class="evg-main-content-div">
+                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
+                        {{~header~}}
+                        </h1>
+                        {{#if subheader1}}
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                            {{~subheader1~}}
+                        </p>
+                        {{/if}}
+                        {{#if subheader2}}
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                            {{~subheader2~}}
+                        </p>
+                        {{/if}}
+                        {{#if subheader3}}
+                        <p class="evg-subheader evg-h2 evg-style-text {{style.className}}">
+                            {{~subheader3~}}
+                        </p>
+                        {{/if}}
+                                        <div class="evg-main-footer-div">
+                    <div class="evg-main-footer-cancel-btn">
+                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="remindmelater">
+                        {{remindmelater}}
+                    </button>
+                    </div>
+                    <div class="evg-main-footer-cta-btn">
+                        <button class="evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="nextToSlide2" tabindex="3">
+                        {{~ctaText~}}
+                        </button>
+                    </div>
+                </div>
+                    </div>
+                    <div class="evg-main-image-div"><img style="width: 100%;" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Logo">
+</div>
+                </div>
+                </div>
+            
+            Slide 2 - Additional Content
+            <div id="evg-slide-2" class="evg-slide evg-hide">
+                <div class="evg-main-content-wrapper-div">
+                    <div class="evg-main-content-div">
+                        <h1 class="evg-header evg-h1 evg-display-4 evg-style-text {{style.className}}">
+                        {{~header2~}}
+                        </h1>
+                <div class="evg-additional-content-wrapper">
+                    <p class="evg-content-text evg-style-text {{style.className}}">
+                                                {{~subheader4~}}
+                    </p>
+                </div>
+                <div class="evg-main-footer-div">
+                <div class="evg-slide-nav">
+                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
+                                                {{~closectaText~}}
+                    </button>
+                </div>
+                </div>
+                    </div>
+                                        <div class="evg-main-image-div"><img style="width: 100%;"src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="Family in Coops Logo">
+</div>
+                </div>
+            </div>
+            </div>
+            Slide 3 - Final Content (can be commented out if not needed)
+            <div id="evg-slide-3" class="evg-slide evg-hide">
+                <div class="evg-additional-content-wrapper">
+                    <h2 class="evg-subheader evg-h2 evg-style-text {{style.className}}">Final Information</h2>
+                    <p class="evg-content-text evg-style-text {{style.className}}">
+                        This is the third slide with final information or a call to action.
+                    </p>
+                </div>
+                <div class="evg-slide-nav">
+                    <button class="evg-main-footer-cancel-btn cancel-close-btn evg-cta evg-btn evg-btn-primary-cancel evg-btn-lg evg-style-text" id="prevToSlide2">
+                        Previous
+                    </button>
+                    <button class="evg-main-footer-cta-btn evg-cta evg-btn evg-btn-primary evg-btn-lg {{style.className}}" id="finalCTA">
+                        Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+  -->
+</code></pre>
 
         <div class="screenshots">
           <!-- <img src="assets/images/screenshot1.png" alt="Screenshot 1"> -->
@@ -148,7 +273,7 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
     cookieDomain: "REDACT.ca",             // Optional tracking cookie domain configuration (overrides default)
     consents: [{
         purpose: SalesforceInteractions.mcis.ConsentPurpose.Personalization,
-        provider: "Cooperators Consent Manager",
+        provider: "Consent Manager",
         status: SalesforceInteractions.ConsentStatus.OptIn
     }]
 }).then(() => {
@@ -271,7 +396,7 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
                         interaction: { name: "Clicked Get a Quote" }
                     });
                 }),
-                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/Cooperators_CG?lang=en']", () => {
+                SalesforceInteractions.listener("click", "footer a[href='https://REDACT.ca/quote/REDACT_CG?lang=en']", () => {
                     SalesforceInteractions.sendEvent({
                         interaction: { name: "NQB home insurance quote clicked" }
                     });
@@ -346,7 +471,7 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
                         interaction: { name: "Clicked Get a Quote" }
                     });
                 }),
-                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/Cooperators_CG/?lang=en']", () => {
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/REDACT_CG/?lang=en']", () => {
                     SalesforceInteractions.sendEvent({
                         interaction: { name: "NQB home insurance quote clicked" }
                     });
@@ -361,12 +486,12 @@ SalesforceInteractions.init({                   // Initializes the Interaction S
                         interaction: { name: "NQB Auto insurance quote clicked" }
                     });
                 }),
-                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/Cooperators_CG/?lang=en']", () => {
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/REDACT_CG/?lang=en']", () => {
                     SalesforceInteractions.sendEvent({
                         interaction: { name: "NQB home insurance quote clicked" }
                     });
                 }),
-                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/Cooperators_CG/?lang=fr']", () => {
+                SalesforceInteractions.listener("click", "a[href='https://REDACT.ca/quote/REDACT_CG/?lang=fr']", () => {
                     SalesforceInteractions.sendEvent({
                         interaction: { name: "NQB home insurance quote clicked" }
                     });
