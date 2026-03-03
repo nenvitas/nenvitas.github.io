@@ -83,6 +83,75 @@
         border-radius: 4px;
         flex: 1 1 300px;
       }
+
+      /* ── Collapsible projects ── */
+      .project-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-bottom: 6px;
+      }
+
+      .project-header .project-title {
+        margin: 0;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        font-size: 11px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      /* hide subsections and direct pre/screenshots when project is collapsed */
+      .project.collapsed .subsection,
+      .project.collapsed > pre,
+      .project.collapsed > .screenshots {
+        display: none;
+      }
+
+      /* ── Collapsible subsections ── */
+      .subsection {
+        margin-bottom: 16px;
+      }
+
+      .subsection-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        margin-bottom: 8px;
+      }
+
+      .subsection-header .subsection-label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: bold;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .subsection-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 10px;
+        color: #bbb;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .subsection.collapsed pre,
+      .subsection.collapsed .screenshots {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -100,44 +169,394 @@
 
       <!-- ── Project 1 ── -->
       <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// paste your code here
-function example() {
-  return "hello world";
-}</code></pre>
-
+        <p class="project-title">Sample Life Journey Sample Stack</p>
+        <p class="project-desc">SQL Activities from our Life Journey integrations</p>
+      
         <div class="screenshots">
-          <!-- <img src="assets/images/screenshot1.png" alt="Screenshot 1"> -->
+               <img src="assets/images/lifejourney.png" alt="Screenshot 1">
+               <img src="assets/images/lifestatus.png" alt="Screenshot 1">
+        </div>
+        <div class="subsection">
+          <p class="subsection-label">Life Journey Automation Activities</p>
+          <pre><code id="code-tmpl-html"></code></pre>
+          <template id="tmpl-tmpl-html"> // Life_Journey_DE_Automation
+SELECT
+wwf.SubscriberKey AS SubscriberKey,
+wwf.FirstName AS FirstName,
+wwf.LastName AS LastName,
+wwf.Email AS Email,
+wwf.Province AS Province,
+wwf.Language AS Language,
+wwf.Form_Submission_Date_Time_Stamp AS Form_Submission_Date_Time_Stamp,
+wwf.Email_Marketing_Consent AS Email_Marketing_Consent,
+wwf.Email_Marketing_Consent_Date_Time_Stamp AS Email_Marketing_Consent_Date_Time_Stamp,
+wwf.Existing_client AS Existing_client,
+0 AS Group_client,
+wjf.Life_policy_flag AS Life_policy_flag, 
+wwf.Type_of_Lead AS Type_of_Lead,
+wjf.Journey_Entry_Date AS Journey_Entry_Date,
+wjf.Journey_Version_Number AS Journey_Version_Number,
+wjf.Opportunity AS Opportunity,
+doi.Double_Optin AS Double_Optin,
+doi.Double_Optin_Date_Time_Stamp AS Double_Optin_Date_Time_Stamp,
+wjf.HH_AGENCY AS HH_AGENCY,
+wjf.AGT_TYPE AS AGT_TYPE,
+wjf.AGT_NAME AS AGT_NAME,
+wjf.AGT_DESIGNATIONS AS AGT_DESIGNATIONS,
+wjf.AGT_TITLE AS AGT_TITLE,
+wjf.AGENCY_NAME AS AGENCY_NAME,
+wjf.AGT_ADDRESS AS AGT_ADDRESS,
+wjf.AGT_CITY AS AGT_CITY,
+wjf.AGT_PROV AS AGT_PROV,
+wjf.AGT_POSTAL AS AGT_POSTAL,
+wjf.AGT_PHONE AS AGT_PHONE,
+wjf.AGT_EMAIL AS AGT_EMAIL,
+wjf.AGENCY_EMAIL AS AGENCY_EMAIL
+FROM [Life_web_form_de] wwf
+LEFT JOIN [double_opt_in_de] doi
+ON wwf.SubscriberKey = doi.SubscriberKey
+LEFT JOIN [Life_Journey_DE] wjf
+ON wwf.SubscriberKey = wjf.SubscriberKey
+WHERE wwf.SubscriberKey IS NOT NULL
+
+
+
+            // Life_Journey_DE_Policy_Check
+SELECT 
+    t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    CASE
+        WHEN t3.PolicyType = 'Life' THEN 1
+        ELSE 0
+    END AS Life_policy_flag
+FROM [Life_Journey_DE] t1
+JOIN ENT.[InsurancePolicy_Salesforce_2] t3
+ON t1.SubscriberKey = t3.NameInsuredId
+WHERE t3.PolicyType = 'Life'
+
+
+            // Life_Journey_DE_Policy_Group_Check
+SELECT 
+    t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    t1.Life_policy_flag,
+    CASE
+        WHEN t3.Producer_Code__c like '77%' THEN 1
+        ELSE 0
+    END AS Group_client
+FROM [Life_Journey_DE] t1
+JOIN ENT.[InsurancePolicy_Salesforce_2] t3
+ON t1.SubscriberKey = t3.NameInsuredId
+
+
+            //Life_EDW_Import
+SELECT 
+    e.CLIENT_SF_ACCOUNT_ID AS SubscriberKey,
+    NULLIF(e.AGENCYCODE, 'NULL') AS HH_AGENCY,
+    NULLIF(e.AGENCY_TYPE, 'NULL') AS AGT_TYPE,
+    Email,
+    NULLIF(e.AGENT_NAME, 'NULL') AS AGT_NAME,
+    NULLIF(
+        CASE 
+            WHEN w.Language = 'English' THEN e.AGENCY_NAME_EN
+            WHEN w.Language = 'French' THEN e.AGENCY_NAME_FR
+        END, 'NULL'
+    ) AS AGENCY_NAME,
+    NULLIF(e.AGT_DESIGNATIONS, 'NULL') AS AGT_DESIGNATIONS,
+    NULLIF(e.AGENCY_ADDRESS, 'NULL') AS AGT_ADDRESS,
+    NULLIF(e.AGENCY_POSTALCODE, 'NULL') AS AGT_POSTAL,
+    NULLIF(e.AGENCY_EMAIL, 'NULL') AS AGENCY_EMAIL,
+    NULLIF(e.AGENCY_CITY, 'NULL') AS AGT_CITY,
+    NULLIF(e.AGT_PROV, 'NULL') AS AGT_PROV,
+    NULLIF(e.AGT_PHONE, 'NULL') AS AGT_PHONE,
+    NULLIF(
+        CASE 
+            WHEN w.Language = 'English' THEN e.ADVISOR_HOLDINGOUT_TITLE_EN
+            WHEN w.Language = 'French' THEN e.ADVISOR_HOLDINGOUT_TITLE_FR
+        END, 'NULL'
+    ) AS AGT_TITLE,
+    NULLIF(e.ADVISOR_EMAIL, 'NULL') AS AGT_EMAIL
+FROM [EDW_Advisor_Information_Life] e
+JOIN [Life_Journey_DE] w
+ON w.SubscriberKey = e.CLIENT_SF_ACCOUNT_ID
+          </template>
+        </div>
+
+        <div class="subsection">
+          <p class="subsection-label">Life Status Check</p>
+          <pre><code id="code-tmpl-css"></code></pre>
+          <template id="tmpl-tmpl-css"> // Life_Journey_DE_Status_Check
+SELECT t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    t2.GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY AS Email_Marketing_Consent,
+    t2.LAST_UPDATED_DATE AS Email_Marketing_Consent_Date_Time_Stamp
+FROM [Life_Journey_DE] AS t1
+JOIN [EMAIL_PREFERENCE_CENTER] AS t2
+ON t1.SubscriberKey = t2.SUBSCRIBER_KEY
+
+
+            //Life_Journey_DE_Policy_Check
+SELECT 
+    t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    CASE
+        WHEN t3.PolicyType = 'Life' THEN 1
+        ELSE 0
+    END AS Life_policy_flag
+FROM [Life_Journey_DE] t1
+JOIN ENT.[InsurancePolicy_Salesforce_2] t3
+ON t1.SubscriberKey = t3.NameInsuredId
+WHERE t3.PolicyType = 'Life'
+
+
+          </template>
         </div>
       </div>
-
-      <!-- ── Project 2 ── -->
+      <!-- ── Project 1 ── -->
       <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// paste your code here</code></pre>
-
+        <p class="project-title">Sample Wealth Journey Sample Stack</p>
+        <p class="project-desc">SQL Activities from our Wealth Journey integrations</p>
+      
         <div class="screenshots">
-          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
+               <img src="assets/images/wealthjourney.png" alt="Screenshot 1">
+               <img src="assets/images/wealthstatus.png" alt="Screenshot 1">
+        </div>
+        <div class="subsection">
+          <p class="subsection-label">Wealth Journey Automation Activities</p>
+          <pre><code id="code-tmpl-htmlwealth"></code></pre>
+          <template id="tmpl-tmpl-htmlwealth"> // Wealth_Journey_DE_Automation
+SELECT
+wwf.SubscriberKey AS SubscriberKey,
+wwf.FirstName AS FirstName,
+wwf.LastName AS LastName,
+wwf.Email AS Email,
+wwf.Province AS Province,
+wwf.Language AS Language,
+wwf.Form_Submission_Date_Time_Stamp AS Form_Submission_Date_Time_Stamp,
+wwf.Email_Marketing_Consent AS Email_Marketing_Consent,
+wwf.Email_Marketing_Consent_Date_Time_Stamp AS Email_Marketing_Consent_Date_Time_Stamp,
+wwf.Existing_client AS Existing_client,
+0 AS Group_client,
+wjf.Wealth_policy_flag AS Wealth_policy_flag, 
+wwf.Type_of_Lead AS Type_of_Lead,
+wjf.Journey_Entry_Date AS Journey_Entry_Date,
+wjf.Journey_Version_Number AS Journey_Version_Number,
+wjf.Opportunity AS Opportunity,
+doi.Double_Optin AS Double_Optin,
+doi.Double_Optin_Date_Time_Stamp AS Double_Optin_Date_Time_Stamp,
+wjf.HH_AGENCY AS HH_AGENCY,
+wjf.AGT_TYPE AS AGT_TYPE,
+wjf.AGT_NAME AS AGT_NAME,
+wjf.AGT_DESIGNATIONS AS AGT_DESIGNATIONS,
+wjf.AGT_TITLE AS AGT_TITLE,
+wjf.AGENCY_NAME AS AGENCY_NAME,
+wjf.AGT_ADDRESS AS AGT_ADDRESS,
+wjf.AGT_CITY AS AGT_CITY,
+wjf.AGT_PROV AS AGT_PROV,
+wjf.AGT_POSTAL AS AGT_POSTAL,
+wjf.AGT_PHONE AS AGT_PHONE,
+wjf.AGT_EMAIL AS AGT_EMAIL,
+wjf.AGENCY_EMAIL AS AGENCY_EMAIL
+FROM [Wealth_web_form_de] wwf
+LEFT JOIN [double_opt_in_de] doi
+ON wwf.SubscriberKey = doi.SubscriberKey
+LEFT JOIN [Wealth_Journey_DE] wjf
+ON wwf.SubscriberKey = wjf.SubscriberKey
+WHERE wwf.SubscriberKey IS NOT NULL
+
+
+
+            // Wealth_Journey_DE_Policy_Check
+SELECT 
+    t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    CASE
+        WHEN t3.PolicyType = 'Investments' THEN 1
+        ELSE 0
+    END AS Wealth_policy_flag
+FROM [Wealth_Journey_DE] t1
+JOIN ENT.[InsurancePolicy_Salesforce_2] t3
+ON t1.SubscriberKey = t3.NameInsuredId
+WHERE t3.PolicyType = 'Investments'
+
+
+            // Wealth_Journey_DE_Policy_Group_Check
+SELECT 
+    t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    t1.Wealth_policy_flag,
+    CASE
+        WHEN t3.Producer_Code__c like '77%' THEN 1
+        ELSE 0
+    END AS Group_client
+FROM [Wealth_Journey_DE] t1
+JOIN ENT.[InsurancePolicy_Salesforce_2] t3
+ON t1.SubscriberKey = t3.NameInsuredId
+
+
+            //Wealth_EDW_Import
+SELECT 
+    e.CLIENT_SF_ACCOUNT_ID AS SubscriberKey,
+    NULLIF(e.AGENCYCODE, 'NULL') AS HH_AGENCY,
+    NULLIF(e.AGENCY_TYPE, 'NULL') AS AGT_TYPE,
+    Email,
+    NULLIF(e.AGENT_NAME, 'NULL') AS AGT_NAME,
+    NULLIF(
+        CASE 
+            WHEN w.Language = 'English' THEN e.AGENCY_NAME_EN
+            WHEN w.Language = 'French' THEN e.AGENCY_NAME_FR
+        END, 'NULL'
+    ) AS AGENCY_NAME,
+    NULLIF(e.AGT_DESIGNATIONS, 'NULL') AS AGT_DESIGNATIONS,
+    NULLIF(e.AGENCY_ADDRESS, 'NULL') AS AGT_ADDRESS,
+    NULLIF(e.AGENCY_POSTALCODE, 'NULL') AS AGT_POSTAL,
+    NULLIF(e.AGENCY_EMAIL, 'NULL') AS AGENCY_EMAIL,
+    NULLIF(e.AGENCY_CITY, 'NULL') AS AGT_CITY,
+    NULLIF(e.AGT_PROV, 'NULL') AS AGT_PROV,
+    NULLIF(e.AGT_PHONE, 'NULL') AS AGT_PHONE,
+    NULLIF(
+        CASE 
+            WHEN w.Language = 'English' THEN e.ADVISOR_HOLDINGOUT_TITLE_EN
+            WHEN w.Language = 'French' THEN e.ADVISOR_HOLDINGOUT_TITLE_FR
+        END, 'NULL'
+    ) AS AGT_TITLE,
+    NULLIF(e.ADVISOR_EMAIL, 'NULL') AS AGT_EMAIL
+FROM [EDW_Advisor_Information_Wealth] e
+JOIN [Wealth_Journey_DE] w
+ON w.SubscriberKey = e.CLIENT_SF_ACCOUNT_ID
+          </template>
+        </div>
+
+        <div class="subsection">
+          <p class="subsection-label">Wealth Status Check</p>
+          <pre><code id="code-tmpl-csswealth"></code></pre>
+          <template id="tmpl-tmpl-csswealth"> // Wealth_Journey_DE_Status_Check
+SELECT t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    t2.GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY AS Email_Marketing_Consent,
+    t2.LAST_UPDATED_DATE AS Email_Marketing_Consent_Date_Time_Stamp
+FROM [Wealth_Journey_DE] AS t1
+JOIN [EMAIL_PREFERENCE_CENTER] AS t2
+ON t1.SubscriberKey = t2.SUBSCRIBER_KEY
+
+
+            //Wealth_Journey_DE_Policy_Check
+SELECT 
+    t1.SubscriberKey,
+    t1.FirstName,
+    t1.LastName,
+    t1.Province,
+    t1.Form_Submission_Date_Time_Stamp,
+    t1.Existing_client,
+    t1.Email,
+    CASE
+        WHEN t3.PolicyType = 'Investments' THEN 1
+        ELSE 0
+    END AS Wealth_policy_flag
+FROM [Wealth_Journey_DE] t1
+JOIN ENT.[InsurancePolicy_Salesforce_2] t3
+ON t1.SubscriberKey = t3.NameInsuredId
+WHERE t3.PolicyType = 'Investments'
+
+
+          </template>
         </div>
       </div>
-
-      <!-- ── Project 3 ── -->
-      <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// paste your code here</code></pre>
-
-        <div class="screenshots">
-          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
-        </div>
-      </div>      
-
     </div>
+
+    <script>
+      // Copy template HTML into code blocks
+      document.querySelectorAll('template[id^="tmpl-"]').forEach(function(tmpl) {
+        var codeEl = document.getElementById(tmpl.id.replace('tmpl-', 'code-'));
+        if (codeEl) codeEl.textContent = tmpl.innerHTML;
+      });
+
+      // Collapsible projects — start all collapsed
+      document.querySelectorAll('.project').forEach(function(project) {
+        var titleEl = project.querySelector('.project-title');
+        if (!titleEl) return;
+
+        // Build toggle button
+        var btn = document.createElement('button');
+        btn.className = 'toggle-btn';
+        btn.setAttribute('aria-label', 'Toggle section');
+        btn.textContent = '▶';
+
+        // Wrap button + title in a clickable header row
+        var header = document.createElement('div');
+        header.className = 'project-header';
+        titleEl.parentNode.insertBefore(header, titleEl);
+        header.appendChild(btn);
+        header.appendChild(titleEl);
+
+        // Start collapsed
+        project.classList.add('collapsed');
+
+        header.addEventListener('click', function() {
+          project.classList.toggle('collapsed');
+          btn.textContent = project.classList.contains('collapsed') ? '▶' : '▼';
+        });
+      });
+
+      // Collapsible subsections — start all collapsed
+      document.querySelectorAll('.subsection').forEach(function(sub) {
+        var labelEl = sub.querySelector('.subsection-label');
+        if (!labelEl) return;
+
+        var btn = document.createElement('button');
+        btn.className = 'subsection-toggle-btn';
+        btn.setAttribute('aria-label', 'Toggle subsection');
+        btn.textContent = '▶';
+
+        var header = document.createElement('div');
+        header.className = 'subsection-header';
+        labelEl.parentNode.insertBefore(header, labelEl);
+        header.appendChild(btn);
+        header.appendChild(labelEl);
+
+        sub.classList.add('collapsed');
+
+        header.addEventListener('click', function() {
+          sub.classList.toggle('collapsed');
+          btn.textContent = sub.classList.contains('collapsed') ? '▶' : '▼';
+        });
+      });
+    </script>
   </body>
 </html>
 

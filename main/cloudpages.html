@@ -180,7 +180,649 @@
           <p class="subsection-label">Submission page</p>
           <pre><code id="code-tmpl-html"></code></pre>
           <template id="tmpl-tmpl-html"> // Preference Center Submission
-GOES HERE
+<script runat="server">
+    Platform.Load('Core','1');    
+    
+  try{
+</script>
+
+%%[
+
+ 
+ /* retrive the RecordTypeID from url  we no longer need this hard code to personClient type logic is just to display different preference verbiage and ui - all are same now
+ and if we change there is a better way to qualify users */
+ 
+ SET @retrivedRecordTypeID = RequestParameter("r")
+ SET @retrivedRecordTypeID = "012Ah0000004HVtIAM"
+
+ 
+ SET @accountID = RequestParameter("acc")
+ SET @languageID = RequestParameter("lang")
+ SET @isLead = RequestParameter("islead")
+ 
+ SET @year = format(Now(1),"yyyy"); 
+ SET @group_client_data = "No"
+ SET @webLead = false
+ SET @isKindOfLead = false
+ SET @isNQBLead = false
+
+SET @environment = "Prod"
+
+IF @environment == "Prod" THEN
+SET @indexDE = "INDEX_PREFERENCES"
+SET @recordTypesDE = "RECORD_TYPES_PREFERENCES"
+SET @consentClientDE = "ENT.Consent__c_Salesforce_2"
+SET @accountClientDE = "ENT.Account_Salesforce_2"
+SET @prefDE = "EMAIL_PREFERENCE_CENTER"
+ELSEIF @environment == "Prod-Test" THEN
+SET @indexDE = "INDEX_PREFERENCES_TESTING"
+SET @recordTypesDE = "RECORD_TYPES_PREFERENCES_TESTING"
+SET @consentClientDE = "ENT.Consent__c_Salesforce_2"
+SET @accountClientDE = "ENT.Account_Salesforce_2"
+SET @prefDE = "EMAIL_PREFERENCE_CENTER_WEBFORM_TESTING"
+ELSEIF @environment == "SITUAT" THEN 
+SET @indexDE = "INDEX_PREFERENCES"
+SET @recordTypesDE = "RECORD_TYPES_PREFERENCES"
+SET @consentClientDE = "ENT.Consent__c_Salesforce_3"
+SET @accountClientDE = "ENT.Account_Salesforce_3"
+SET @prefDE = "EMAIL_PREFERENCE_CENTER"
+ENDIF
+
+
+ 
+ /* Check what type of lead if any */
+ IF NOT EMPTY(@accountID) THEN
+ SET @webLeadRows = RetrieveSalesforceObjects(
+
+    "Lead",
+    "FirstName, LastName, Email, Email_Marketing_Consent__c, Id, Web_form__c, Product_of_interest__c, Record_Type__c, LeadSource, State",
+    "Id","=", @accountID
+    
+    )    
+    
+    SET @countWebLeadRows =  RowCount(@webLeadRows)
+
+     IF RowCount(@webLeadRows) > 0 THEN
+      SET @isKindOfLead = true
+     
+]%%
+
+<script>window.console.log(%%=concat("' Yes Is some kind of Lead : ", @accountID, "'")=%%)</script>
+
+%%[
+     
+        
+        SET @webLeadinfo = Row(@webLeadRows, 1)
+        SET @firstName = Field(@webLeadinfo,"FirstName")      
+        SET @LastName = Field(@webLeadinfo,"LastName")
+        SET @email = Field(@webLeadinfo, "Email")
+        SET @LeadId = Field(@webLeadinfo, "Id")
+        SET @email = Field(@webLeadinfo, "Email")
+        SET @province = Field(@webLeadinfo, "State")
+       /*  Added this replaces check on "Record_Type__c"
+        "LeadSource" */
+        SET @webLead = Field(@webLeadinfo, "Web_form__c")
+        SET @webLeadConsent = Field(@webLeadinfo, "Email_Marketing_Consent__c")
+
+     ENDIF
+     
+ENDIF
+
+IF @isKindOfLead AND NOT @webLead THEN
+
+SET @isNQBLead = true
+
+ENDIF
+ 
+]%%
+
+<script>window.console.log(%%=concat("'Is an NQB Lead? : ", @isNQBLead, "'")=%%)</script>
+
+%%[
+
+ 
+/* to Pass Account Id to thank you page */
+ SET @UnsubURL = CloudPagesURL(2429,'AID',@accountID)
+ 
+ IF @languageID != 'french' THEN
+  /* default language taken as English */
+  SET @languageID = 'en';
+  SET @title = "Email Preference Centre"
+  SET @year_range = Concat("1997-",@year)
+  SET @footer_text = Concat("Copyright © ",@year_range, " Co-operators")
+ ELSE
+  SET @languageID = 'fr'
+  SET @title = "Centre de gestion despréférences courriel"
+  SET @year_range = Concat("2006-",@year)
+  SET @footer_text = Concat("© Co-operators","<sup>MD</sup>, ",@year_range)
+ ENDIF
+ 
+ SET @numRowsToReturn = 0 
+ 
+  /* set value to TRUE inorder to perform a lookup to INDEX_PREFERENCES data extension */
+ SET @isRecordTypeCheckBoxActive = 'TRUE'
+ 
+ /* perform a lookup */
+ IF @isLead == "Yes" THEN
+    SET @indexPreferencesLookUpRows = LookupOrderedRows("LEAD_INDEX_PREFERENCES", @numRowsToReturn, "PROSPECT_RANK ASC","IS_CHECKBOX_ACTIVE",@isRecordTypeCheckBoxActive)
+
+ ELSE
+    SET @isRecordTypeActive = "True"
+    SET @RecordTypePriority = LookupOrderedRows(@recordTypesDE, @numRowsToReturn, "PRIORITY_RANK ASC","IS_ACTIVE",@isRecordTypeActive)
+    SET @RecordTypePriorityRowCount = rowcount(@RecordTypePriority)
+    IF @RecordTypePriorityRowCount > 0 THEN
+        SET @break = 'false'
+        FOR @r = 1 to @RecordTypePriorityRowCount do
+            IF @break != 'true' THEN
+                /* enter every row one by one */ 
+                SET @RecordTypePriorityRow = row(@RecordTypePriority, @r)
+                SET @RecordType = field(@RecordTypePriorityRow,"RECORD_TYPE")
+                SET @PriorityRecordTypeId = field(@RecordTypePriorityRow,"RECORD_TYPE_ID")
+                SET @PriorityRank = field(@RecordTypePriorityRow,"PRIORITY_RANK")    
+                SET @RecordTypeName = field(@RecordTypePriorityRow,"RECORD_TYPE_NAME")
+            
+                IF @PriorityRecordTypeId == 'group_client_record_type' THEN
+                    /*check weather the user is group or not start*/
+                    SET @insurance_result = RetrieveSalesforceObjects("InsurancePolicy","Producer_Code__c", "NameInsuredId", "=", @accountID)
+                    SET @insuranceRowCount = rowcount(@insurance_result)
+                    IF @insuranceRowCount > 0 THEN
+                        FOR @i = 1 to @insuranceRowCount do
+                            SET @insurance_row= row(@insurance_result, @i)
+                            SET @Producer_Code__c = field(@insurance_row,"Producer_Code__c")
+                            SET @producer_code = Substring(@Producer_Code__c,1,2)
+                            IF @producer_code == "77" THEN
+                                SET @group_client_data = "Yes"
+                            ENDIF
+                        NEXT @i
+                    ENDIF
+                    /*check weather the user is group or not end*/
+                    IF @group_client_data == 'Yes' THEN
+                        SET @indexPreferencesLookUpRows = LookupOrderedRows(@indexDE, @numRowsToReturn, "PROSPECT_RANK ASC",@RecordTypeName, @isRecordTypeCheckBoxActive,"IS_CHECKBOX_ACTIVE",@isRecordTypeCheckBoxActive)
+                        SET @break = 'true'
+                    ENDIF
+
+                ELSEIF @retrivedRecordTypeID == @PriorityRecordTypeId THEN
+                    SET @indexPreferencesLookUpRows = LookupOrderedRows(@indexDE, @numRowsToReturn, "PROSPECT_RANK ASC",@RecordTypeName, @isRecordTypeCheckBoxActive,"IS_CHECKBOX_ACTIVE",@isRecordTypeCheckBoxActive)
+                    SET @break = 'true'
+                ENDIF
+            ENDIF
+        NEXT @r
+
+        ELSE
+    ENDIF
+ENDIF
+ 
+]%%
+
+
+<script runat="server">
+    }catch(e){
+ Write(Stringify(e));
+}
+ /*   Write('Got Here <br><br>'); */
+</script>
+
+%%[IF @languageID == 'fr' AND @isLead == "Yes" THEN ]%% Centre de gestion des préférences – Soumissions auto et habitation %%[ELSEIF @languageID == 'en' AND @isLead == "Yes" THEN]%% Home and Auto Quote Preference Centre %%[ELSEIF @languageID == 'fr' THEN]%% Centre de gestion de préférences courriel  %%[ELSE]%% Email Preference Centre  %%[ENDIF]%% 
+%%[IF @languageID == 'fr' AND @isLead == "Yes" THEN ]%%
+Choisissez dans la liste ci-après les communications que vous aimeriez recevoir. Vous recevrez uniquement les publications choisies et nous ne communiquerons pas vos coordonnées à des tiers.
+%%[ELSEIF @languageID == 'en' AND @isLead == "Yes" THEN]%%
+Choose which of the following communications you’d like to receive. Your contact information will not be shared externally.
+ %%[ELSEIF @languageID == "fr" THEN ]%%
+Choisissez dans la liste ci-après les publications que vous aimeriez recevoir par courriel. Vous recevrez uniquement les publications choisies et nous ne communiquerons pas vos adresse courriel à des tiers. Les clients de Co-operators peuvent modifier leurs préférences en tout temps sur les Services en ligne.
+%%[ELSE]%%
+Choose which of the following publications you'd like to receive. We only send emails you opt into and won't share your email address externally. Clients can also update their preferences at any time using Online Services.
+%%[ENDIF]%%
+ 
+
+<title>%%=v(@title)=%%</title>
+   %%[ 
+      SET @firstName = ""      
+      SET @LastName = ""
+      SET @email = ""
+      SET @emailOther = ""
+      SET @language = ""
+      SET @province = ""
+      /*Initialize values that will later be populated by CRM or Pref DE call to get consent*/
+      SET @generalExtremeWeather = "No"      
+      SET @generalInsurance = "No"
+      SET @productAndService = "No"
+      SET @newsletterForBusinessOwners = "No"
+      
+      SET @financialMarkets = "No"
+      SET @wealthAndPersonalFinance = "No"
+      
+      SET @isCompanyUser = false
+
+      /* Web Lead flow - 
+      If Web Lead is Client track their preferences in client flow just ensure that IS_WEB_LEAD in pref DE is updated accordingly - 
+      
+      If not a client then the preferences will be tracked entirely in SFMC Preference Center DE for new Web leads using the preference center link (i.e. not a client and first time user) the logic will insert a new record base on the Lead Id, some of this logic will be done during the Web form process I just need to consume the end product.
+
+      The general consent for Web Leads will be on
+      Email_Marketing_Consent__c
+      on the Lead object as opposed to the Lead_consent
+      object which is the case of Digital (NQB) leads
+
+    For instance the Lead object will have the following field:
+
+      Web_form__c
+
+      This will have the value 'true' we can use that to qualify the flow to ensure the user is a Web Lead rather then current process.
+
+      As of now, new lead objects have that field properly configured but still there is issue creating a Web Lead from SFMC (uses MC Connect API with CRM) 
+      as logic blocks a duplicate lead creation for the edge case where user is already NQB lead..
+      impacts end to end testing 
+      ....
+      fudge some of the return values to test the flow.
+
+      Same User will NOT have same Lead ID for NQB as for a Web Lead, this simplifies pref center flows
+       */
+
+      SET @isWebLead = "No"
+
+      /* Checking if Web Lead - have to get account info
+      anyway so we do so before confirming is a Web Lead */
+    
+IF NOT EMPTY(@accountID) THEN
+SET @webLeadRows = RetrieveSalesforceObjects(
+
+    "Lead",
+    "FirstName, LastName, Email, Email_Marketing_Consent__c, Id, Web_form__c, Product_of_interest__c, Record_Type__c, LeadSource, State",
+    "Id","=", @accountID
+    
+    )
+
+    SET @webLead = false
+    
+    SET @countWebLeadRows =  RowCount(@webLeadRows)
+
+     IF RowCount(@webLeadRows) > 0 THEN
+    
+        SET @webLeadinfo = Row(@webLeadRows, 1)
+        SET @firstName = Field(@webLeadinfo,"FirstName")      
+        SET @LastName = Field(@webLeadinfo,"LastName")
+        SET @email = Field(@webLeadinfo, "Email")
+        SET @LeadId = Field(@webLeadinfo, "Id")
+        SET @email = Field(@webLeadinfo, "Email")
+        SET @province = Field(@webLeadinfo, "State")
+       /*  Added this replaces check on "Record_Type__c"
+        "LeadSource" */
+        SET @webLead = Field(@webLeadinfo, "Web_form__c")
+        SET @webLeadConsent = Field(@webLeadinfo, "Email_Marketing_Consent__c")
+
+     ENDIF
+     
+]%%
+
+<script>window.console.log(%%=concat("'Is a web Lead? : ", @webLead, "'")=%%)</script>
+<script>window.console.log(%%=concat("'has firstName? : ", @firstName, "'")=%%)</script>
+<script>window.console.log(%%=concat("'has lastName? : ", @lastName, "'")=%%)</script>
+
+%%[
+
+  IF @webLead == true THEN
+]%%
+
+<script>window.console.log(%%=concat("'Getting in the If web Lead branch? : ", @countWebLeadRows, "'")=%%)</script>
+
+%%[
+   SET @isWebLead = "Yes"
+    /* note that consent for Web Lead is directly on lead object in the form of "Email_Marketing_Consent__c" */
+  ENDIF
+
+ENDIF
+
+/*
+End if checking web lead 
+next flow is client (includes prospects as they also live in Accounts object)
+Client may still have the web leads flag
+but the rest of their account info is pulled in the existing flow, so updating that flag will be the one change in that flow, separate flow for web lead not a client
+*/
+    
+           
+      SET @marketingConsentRecordTypeId = "012Ah0000004HVqIAM" /*this is RecordTypeId for Marketing consent in Consent object*/
+      
+      /* NQB Leads flow */
+      IF (@isLead == "Yes") Then
+        /* getting Lead details from sync DE  */
+          IF NOT EMPTY(@accountID) THEN
+             /* getting Lead object details from sync DE  */
+             SET @leadDetails = LookupRows("ENT.Lead_Salesforce_2","Id",@accountID)
+            
+            /* NQB Leads flow */
+            
+            /* getting Quote object details from sync DE  */
+            SET @quoteDetails = LookupRows("ENT.Quote__c_Salesforce_2","Related_Lead__c", @accountID)
+            SET @quoteDetailsRowCount = rowcount(@quoteDetails)        
+            IF @quoteDetailsRowCount > 0 THEN
+                SET @quoteDetailsRow = row(@quoteDetails, 1)
+                SET @language = field(@quoteDetailsRow,"Language__c")
+            ENDIF
+           
+            
+             /* getting Lead Consent object details from CRM */
+             SET @leadConsent = RetrieveSalesforceObjects("Lead_Consent__c","Marketing_Consent__c,Product_Type__c,Id", "Related_Lead__c", "=", @accountID)
+             
+          ENDIF 
+          
+          
+           /* get user details from account */
+
+         SET @leadDetailsRowCount = rowcount(@leadDetails)
+
+         IF @leadDetailsRowCount > 0 THEN
+              SET @leadDetailsRow = row(@leadDetails, 1)
+              SET @firstName = field(@leadDetailsRow,"FirstName")      
+              SET @LastName = field(@leadDetailsRow,"LastName")
+              SET @email = field(@leadDetailsRow,"Email")
+              SET @province = field(@leadDetailsRow,"State")
+              SET @leadId = field(@leadDetailsRow,"Id")
+          ENDIF
+
+
+
+          /* End of NQB Leads flow */
+      ELSE
+
+             /* getting unsub status from pref DE and  account details from sync DE and consent from CRM */
+          IF NOT EMPTY(@accountID) THEN
+            SET @userUnsubStatus = LookupRows(@prefDE,"SUBSCRIBER_KEY",@accountID)
+            SET @userUnsubStatusRowCount = rowcount(@userUnsubStatus)
+            IF @userUnsubStatusRowCount > 0 THEN
+              SET @userUnsubStatusRow = row(@userUnsubStatus, 1)
+              SET @unsubEmailStatus = field(@userUnsubStatusRow,"UNSUBSCRIBE_FROM_ALL_EMAILS") 
+            ENDIF
+           SET @userDetails = LookupRows("ENT.Account_Salesforce_2","Id",@accountID)
+              SET @userConsent = RetrieveSalesforceObjects("Consent__c","Campaigns__c, Newsletters__c, Alerts_Reminders__c, NewsLetters_for_Business_Owners__c", "Account__c", "=", @accountID,"RecordTypeId", "=", @marketingConsentRecordTypeId)
+      
+          ENDIF 
+ 
+           /* get user details from account */
+
+         SET @userDetailsRowCount = rowcount(@userDetails)
+
+         IF @userDetailsRowCount > 0 THEN
+              SET @userDetailsRow = row(@userDetails, 1)
+              SET @firstName = field(@userDetailsRow,"FirstName")      
+              SET @LastName = field(@userDetailsRow,"LastName")
+              SET @email = field(@userDetailsRow,"PersonEmail")
+               /*emailOther as CRM field does */
+              SET @emailOther = field(@userDetailsRow,"Email__c")
+              SET @language = field(@userDetailsRow,"FinServ__PrimaryLanguage__pc")
+              SET @province = field(@userDetailsRow,"PersonMailingState")
+              
+              IF (@emailOther != "") THEN
+              SET @isCompanyUser = true            
+              ENDIF
+]%%
+
+<script>window.console.log(%%=concat("'Is a company User? : ", @emailOther, "'")=%%)</script>
+
+%%[
+              
+              /* Either company client or prospect uses different CRM fields */
+              IF @isCompanyUser THEN
+              SET @email = field(@userDetailsRow,"Email__c")
+              SET @language = field(@userDetailsRow,"Language__c")             
+              ENDIF
+          ENDIF
+
+
+          /* get user consent details from consent */
+         SET @userConsentRowCount = rowcount(@userConsent)
+
+         IF @userConsentRowCount > 0 THEN
+              SET @userConsentRow = row(@userConsent, 1)
+              SET @generalExtremeWeather = field(@userConsentRow,"Alerts_Reminders__c")      
+              SET @generalInsurance = field(@userConsentRow,"Newsletters__c")
+              SET @productAndService = field(@userConsentRow,"Campaigns__c")
+              /* Added a consent type so querying for that*/
+              SET @newsletterForBusinessOwners = field(@userConsentRow,"NewsLetters_for_Business_Owners__c")
+                       
+          ENDIF
+          
+             /* get the values that corrsp to SFMC only stored consents */
+            /* Get the pref center DE row corrsp to the account ID*/
+            SET @userRows = LookupRows(@prefDE, "SUBSCRIBER_KEY",@accountID)
+            SET @userRowCount = rowcount(@userRows)
+            /* there should be precisely one row matching the account ID*/
+            IF @userRowCount > 0 THEN
+                /* get the first and only row matching the account ID*/
+                SET @userRow = row(@userRows, 1)
+
+                /* get the corresponding field values */
+                SET @financialMarkets = field(@userRow,"FINANCE_FINANCIAL_MARKET_UPDATES_AND_INSIGHTS") 
+                SET @wealthAndPersonalFinance = field(@userRow,"FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT") 
+                                
+             /* For Web Leads who are not clients these are only in SFMC note "@userDetailsRowCount" will be 0 if not in Account Sync DE - ie this branch is for Web Leads who are not clients or prospects */
+                IF (@isWebLead == "Yes" AND @userDetailsRowCount == 0)THEN 
+                SET @generalExtremeWeather = field(@userRow,"GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS") 
+                SET @generalInsurance = field(@userRow,"GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY")
+                SET @productAndService = field(@userRow,"GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY")
+               
+                SET @newsletterForBusinessOwners = field(@userRow,"BUSINESS_OWNER_ADVICE_PERIODICALLY")
+
+
+                ENDIF
+
+            /* code will follow to update the UI if value "True" we ensure the checkbox is checked otherwise unchecked */
+            
+
+             ENDIF
+
+          
+      ENDIF
+      
+      /* original id of thank you page is 2429, 4820 for Pref center flow now with CASL history */
+           
+SET @UnsubURL = CloudPagesURL(2429,'AID',@accountID,'FirstName',@firstName,'LastName',@LastName,'email',@email,'Language',@language,'Province',@province)
+
+   ]%%
+<form name="regform" action="%%=v(@UnsubURL)=%%" method="POST" class="form">
+    <input type="hidden" id="submitted" name="submitted" value="true">
+    <input type="hidden" id="source" name="source" value="false">
+    <input type="hidden" id="lang" name="lang" value="%%=v(@languageID)=%%">
+    <input type="hidden" id="isLead" name="isLead" value="%%=v(@isLead)=%%">
+    <!--new Web Lead flow-->
+    <input type="hidden" id="isWebLead" name="isWebLead" value="%%=v(@isWebLead)=%%">
+    <input type="hidden" id="unsubEmailStatus" name="unsubEmailStatus" value="%%=v(@unsubEmailStatus)=%%">
+    <input type="hidden" id="group_client_data" name="group_client_data" value="%%=v(@group_client_data)=%%">
+  
+  
+%%[ IF @isLead == "Yes" THEN 
+  SET @consentDetailsRowCount = rowcount(@leadConsent)
+  IF @consentDetailsRowCount > 0 THEN
+    FOR @j = 1 to @consentDetailsRowCount do
+       SET @leadDetailsRow = row(@leadConsent, @j)                  
+       SET @mconsent = field(@leadDetailsRow,"Marketing_Consent__c")
+       SET @product = field(@leadDetailsRow,"Product_Type__c")
+       SET @leadconsentid = field(@leadDetailsRow,"Id")
+]%%
+   
+    <input type="hidden" id="%%=Concat(@product,"_hidden")=%%" name="%%=Concat(@product,"_hidden")=%%" value="%%=v(@mconsent)=%%">
+%%[
+    NEXT @j
+    
+    ENDIF
+ /*removed unnecessary code here*/
+
+ELSE
+/* Hidden fields for Preference matching checkboxes */
+]%%
+    <input type="hidden" id="generalExtremeWeather" name="generalExtremeWeather" value="%%=v(@generalExtremeWeather)=%%">
+    <input type="hidden" id="generalInsurance" name="generalInsurance" value="%%=v(@generalInsurance)=%%">
+    <input type="hidden" id="productAndService" name="productAndService" value="%%=v(@productAndService)=%%">
+  <input type="hidden" id="newsletterForBusinessOwners" name="newsletterForBusinessOwners" value="%%=v(@newsletterForBusinessOwners)=%%">
+    <input type="hidden" id="financialMarkets" name="financialMarkets" value="%%=v(@financialMarkets)=%%">
+  <input type="hidden" id="wealthAndPersonalFinance" name="wealthAndPersonalFinance" value="%%=v(@wealthAndPersonalFinance)=%%">
+%%[ENDIF]%%
+    
+
+  <div class="row">
+    <div class="column">
+      <table>
+      %%[
+            IF @languageID == 'fr' THEN
+                SET @labelFirstname = "Prénom"
+                SET @labelLastName = "Nom de famille"
+                SET @labelEmailAddress = "Courriel"
+                SET @labelLanguage = "Langue"
+                SET @labelProvince = "Province"
+            ELSE
+                SET @labelFirstname = "First Name"
+                SET @labelLastName = "Last Name"
+                SET @labelEmailAddress = "Email Address"
+                SET @labelLanguage = "Preferred language"
+                SET @labelProvince = "Province"
+            ENDIF
+          ]%%
+       
+              <input type="hidden" class="form-control" id="firstName" name="firstName" aria-label="%%[ IF @languageID == 'fr' THEN]%%lecture seule Indisponible%%[ENDIF]%%" placeholder="%%=v(@labelFirstname)=%%" value="%%=v(@firstName)=%%" tabindex="-1" role="textbox" disabled="disabled">
+                   <input type="hidden" class="form-control" id="lastName" name="lastName" aria-label="Unavailable%%[ IF @languageID == 'fr' THEN]%%lecture seule Indisponible%%[ENDIF]%%" placeholder="%%=v(@labelLastName)=%%" value="%%=v(@LastName)=%%" tabindex="-1" role="textbox" disabled="disabled">
+        
+              <input type="hidden" class="form-control" id="Language" name="Language" aria-label="Unavailable%%[ IF @languageID == 'fr' THEN]%%lecture seule Indisponible%%[ENDIF]%%" tabindex="-1" placeholder="%%=v(@labelLanguage)=%%" value="%%=v(@language)=%%" role="textbox" disabled="disabled">
+             <input type="hidden" class="form-control" id="Province" name="Province" aria-label="Unavailable%%[ IF @languageID == 'fr' THEN]%%lecture seule Indisponible%%[ENDIF]%%" tabindex="-1" placeholder="%%=v(@labelProvince)=%%" value="%%=v(@province)=%%" role="textbox" disabled="disabled">
+        
+        <tr>
+          <td>
+            <div class="form-row">
+              <label for="email" class="form-label">%%=v(@labelEmailAddress)=%%</label>
+              <input type="email" class="form-control" id="email" name="email" aria-label="%%[ IF @languageID == 'fr' THEN]%%lecture seule Indisponible%%[ENDIF]%%" tabindex="-1" placeholder="%%=v(@labelEmailAddress)=%%" value="%%=v(@email)=%%" role="textbox" disabled="disabled"> 
+                  <input type="hidden" class="form-control" id="emailOther" name="emailOther" aria-label="%%[ IF @languageID == 'fr' THEN]%%lecture seule Indisponible%%[ENDIF]%%" tabindex="-1" placeholder="%%=v(@labelEmailAddress)=%%" value="%%=v(@emailOther)=%%" role="textbox" disabled="disabled">
+            </div>
+          </td>
+        </tr>
+  %%[IF @isLead != "Yes" THEN]%%
+     
+  %%[ENDIF]%%
+        
+        
+      %%[ 
+        /* perform a row count */
+        SET @indexPreferencesRowCount = rowcount(@indexPreferencesLookUpRows)
+        SET @divMinHeight = ""
+        IF @isLead != "Yes" THEN
+            SET @divMinHeight = "div_min_height"
+        ENDIF
+        IF @indexPreferencesRowCount > 0 THEN
+            FOR @i = 1 to @indexPreferencesRowCount do
+        
+            /* enter every row one by one */ 
+            SET @indexPreferencesRow = row(@indexPreferencesLookUpRows, @i)
+            SET @lookUpCheckboxOptions = field(@indexPreferencesRow,"CHECKBOX_OPTIONS")
+            SET @lookUpHeadline = field(@indexPreferencesRow,"HEADLINE")
+            SET @lookUpSubHeadline = field(@indexPreferencesRow,"SUB_HEADLINE")
+            SET @lookUpIsCheckboxActive = field(@indexPreferencesRow,"IS_CHECKBOX_ACTIVE")
+            SET @lookUpProspectRank = field(@indexPreferencesRow,"PROSPECT_RANK")
+            SET @checkboxFrontEndId = field(@indexPreferencesRow,"CHECKBOX_FRONT_END_ID")
+            
+            IF @languageID == 'fr' THEN 
+            SET @lookUpCheckboxOptions = field(@indexPreferencesRow,"FRENCH_CHECKBOX_OPTIONS")
+            SET @lookUpHeadline = field(@indexPreferencesRow,"FRENCH_HEADLINE")
+            SET @lookUpSubHeadline = field(@indexPreferencesRow,"FRENCH_SUB_HEADLINE")
+        ENDIF
+      
+      ]%%
+        <tr>
+          <td>
+            %%[ IF @lookUpCheckboxOptionsOld != @lookUpCheckboxOptions THEN]%%
+              <h2 class="checkbox-top-label">%%=v(@lookUpCheckboxOptions)=%% </h2>
+            %%[ endif ]%%
+            <div class="form-row" style="margin-left: 35px;">
+                <input value="off" type="hidden" name="%%=Concat(@checkboxFrontEndId,"_hidden")=%%">
+                <input class="form-control checkboxClass" type="checkbox" id="%%=v(@checkboxFrontEndId)=%%" name="%%=v(@checkboxFrontEndId)=%%" onchange="unCheckAll(this)" aria-label="%%[ IF @languageID == 'fr' THEN]%% case à cocher %%[ELSE]%% Checkbox %%[ENDIF]%%" role="checkbox">     
+                <label for="subscription" class="form-label checkbox_label">
+                    %%[IF @isLead != "Yes" THEN ]%%
+                    <b>
+                    %%[ENDIF]%%
+                    <p style="margin:0px 4px 5px;">%%=v(@lookUpHeadline)=%%</p>
+                    %%[IF @isLead != "Yes" THEN ]%%
+                    </b>
+                    %%[ENDIF]%%
+                    
+                
+                    %%[ IF @lookUpSubHeadline != "None" AND  @lookUpSubHeadline != " " THEN ]%% 
+                    <p style="margin:0px 4px;"> %%=v(@lookUpSubHeadline)=%%</p>
+                    %%[ ENDIF]%%
+                </label>
+               </div>       
+        </td>
+      </tr>
+        
+   %%[
+     SET @lookUpCheckboxOptionsOld = @lookUpCheckboxOptions 
+      NEXT @i
+     ELSE
+     ENDIF
+
+  ]%%
+        
+           
+      </table>
+    </div>
+  </div>
+    
+  <div class="row container">
+    <div class="column">
+      <button id="RegSubmit" role="button" type="submit" aria-label="%%[ IF @languageID == 'fr' THEN]%% Button Soumettre %%[ELSE]%% Button submit %%[ENDIF]%%" class="btn register-btn center" value="submit" %%[ IF EMPTY(@accountID) THEN ]%% disabled="disabled" tabindex="-1" %%[ENDIF]%%>
+        %%[ IF @languageID == 'fr' THEN]%% Soumettre %%[ELSE]%% Submit %%[ENDIF]%% 
+          </button>
+    </div>
+  </div>
+</form> 
+
+<div class="unsubscribe_desc">
+  <div>
+    <span class="unsubscribe_desc_span">
+      %%[ IF @languageID == "fr" AND @isLead == "Yes" THEN ]%%
+      Si vous décochez les deux cases et cliquez sur Soumettre, vous ne recevrez aucune autre communication concernant vos soumissions. En fonction de vos préférences existantes, vous pourriez continuer de recevoir d’autres courriels de Co-operators.
+      
+      %%[ ELSEIF @languageID == "en" AND @isLead == "Yes" THEN ]%%
+      By unchecking both boxes and hitting submit you will be removed from any future communications regarding your quote. You may continue to receive other emails from Co-operators based on your existing preferences.
+      
+      %%[ ELSEIF @languageID == "fr" THEN ]%%
+       *Notez que vous continuerez à recevoir des messages nécessaires pour assurer la gestion de votre compte en dépit de votre désabonnement de l’ensemble des courriels. Par exemple, vous continuerez à recevoir des courriels sur les nouvelles polices et les modifications apportées aux polices, des avis sur votre compte des Services en ligne ou sur la révision de dossier-client ou des renseignements sur des demandes de règlement en cours.
+      
+      %%[ELSE]%% 
+       *Unsubscribing from all email communications does not opt you out of messages required to service your account. For example, you will continue to receive emails regarding policy updates or changes, Online Services account notifications, Client Review and/or information related to active claims.
+      
+      %%[ENDIF]%%
+    </span>
+  </div>
+</div>
+<div class="cust_container unsubscribe_desc_span">
+    <div class="footer__row footer__row--border mktoText" id="footer-legal-text">
+        <ul class="footer__list footer__list--inline footer__list--center">
+           %%[ IF @languageID == 'en' AND @isLead == "Yes" THEN ]%%
+          <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"> <u>Legal</u> </a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u> Privacy </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u> Contact Us </u></a></li>
+           %%[ ELSEIF @languageID == 'fr' AND @isLead == "Yes" THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+          %%[ ELSEIF @languageID == 'fr' AND @group_client_data == "Yes" THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/legal.aspx"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy-Policy.aspx"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/contact-us.aspx"><u>Contactez-nous </u></a></li>
+          %%[ ELSEIF @languageID == 'en' AND @group_client_data == "Yes" THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/legal.aspx"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy-Policy.aspx"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/contact-us.aspx"><u>Contact Us</u></a></li>
+          %%[ ELSEIF @languageID == 'fr' THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+          %%[ELSE]%% 
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u>Contact Us</u></a></li>
+          %%[ENDIF]%%
+        </ul>
+    </div>
+</div>
+
+
           </template>
         </div>
 
@@ -1740,61 +2382,7 @@ NEW de value :  %%=v(@New_Type_of_Lead)=%%
 
           </template>
         </div>
-        <div class="subsection">
-          <p class="subsection-label">SSJS</p>
-          <pre><code id="code-tmpl-ssjsherobanner"></code></pre>
-          <template id="tmpl-tmpl-ssjsherobanner"> // ssjs
-export class StyleField {
-    label: string;
-    className: string;
-}
 
-
-export class BannerWithCTATemplate implements CampaignTemplateComponent {
-
-
-    @title("Background Image URL")
-    @subtitle("Replace the placeholder image URL with the image URL for your background image.")
-    imageURL: string = "/-/media/REDACT/assets/home/banners/l0-personal-banner.png";
-    
-    @subtitle("Optional text field")
-    header: string = "Investments. Insurance. Advice.";
-    
-    @subtitle("Optional text field")
-    headeraccent: string = "";
-
-
-    @subtitle("Optional text field")
-    subheader: string = " Get personalized advice and custom solutions from someone who gets you.";
-
-
-    @title("CTA Text")
-    ctatext: string = "Explore insurance plans";
-
-
-    @title("CTA Destination URL")
-    @subtitle("Requires full URL string including https://")
-    ctaurl: string = "/en/personal/insurance";
-
-
-    @title("Retrieve CTA Text")
-    retctatext: string = "Browse investment options";
-
-
-    @title("Retrieve CTA Destination URL")
-    @subtitle("Requires full URL string including https://")
-    retctaurl: string = "/en/personal/investments";
-
-
-    run(context: CampaignComponentContext) {
-        return {};
-    }
-
-
-}
-
-          </template>
-        </div>
         </div>      
 
     </div>
