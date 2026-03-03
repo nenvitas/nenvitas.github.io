@@ -1506,241 +1506,147 @@ ul {
           <p class="subsection-label">Opportunity Creation from DOI</p>
           <pre><code id="code-tmpl-cssopp"></code></pre>
           <template id="tmpl-tmpl-cssopp"> //
+<script runat="server">
+  Platform.Load('Core', '1');
+  HTTPHeader.SetValue("Access-Control-Allow-Methods", "GET, POST");
+  HTTPHeader.SetValue("Access-Control-Allow-Origin", "https://www.cooperators.ca");
+    try {
+</script>
+
 %%[
-/* Retrieve encrypted query parameters from the URL */
-VAR @SubscriberKey, @ProducerCode, @Language, @ctaURL, @Header, @BodyCopy, @CTA
-SET @SubscriberKey = QueryParameter("SubscriberKey")
-SET @ProducerCode = QueryParameter("ProducerCode")
-SET @Province = QueryParameter("Province")
-SET @Language = QueryParameter("Language")
-SET @year = Format(Now(), "yyyy")
+VAR @producerCode, @rows, @rowCount, @subscriberKey, @now, @sfmcDate, @errorFlag, @rowscta, @ctalookup
 
-IF @Province == 'Quebec' OR @Province == 'QC'
-THEN
-SET @ctaURL = CloudPagesURL(5738, 'SubscriberKey', @SubscriberKey, 'ProducerCode', @ProducerCode, 'Language', @Language)
+SET @producerCode = RequestParameter("ProducerCode")
+SET @subscriberKey = RequestParameter("SubscriberKey")
+SET @language = RequestParameter("Language")
+
+SET @now = DateAdd(Now(), 1, "H")
+SET @sfmcDate = Replace(FormatDate(@now, "yyyy-MM-ddT", "HH:mm:ss"), " ", "")
+
+SET @errorFlag = "false"
+
+SET @rowscta = LookupRows("Wealth_x_sell_Journey_DE", "SubscriberKey", @subscriberKey)
+SET @ctalookup = Field(Row(@rowscta, 1), "CTA_Clicked")
+
+IF @ctalookup == "True" THEN
+                                  IF @language == "French" THEN
+                                   Redirect("https://www.cooperators.ca/fr-ca/thank-you?utm_source=email&utm_medium=sfmc&utm_campaign=lifexsell&utm_term=wealth-cross-sell")
+                                  ELSE
+                                   Redirect("https://www.cooperators.ca/en/thank-you?utm_source=email&utm_medium=sfmc&utm_campaign=lifexsell&utm_term=wealth-cross-sell")
+                                  ENDIF
 ELSE
-SET @ctaURL = CloudPagesURL(5501, 'SubscriberKey', @SubscriberKey, 'ProducerCode', @ProducerCode, 'Language', @Language)
 ENDIF
+/* Check if ProducerCode exists in Salesforce — adjust object and field names */
 
-IF @Language == 'French'
-THEN
-SET @Header = "Profitez des conseils financiers d’un partenaire de confiance"
-SET @BodyCopy = "Veuillez confirmer votre demande, et un représentant ou une représentante communiquera avec vous sous peu"
-SET @CTA = "Oui, demander un appel"
+if not empty (@producerCode) AND @ctalookup == "False"
+
+      then
+  
+   
+            SET @rows = RetrieveSalesforceObjects(
+            "Opportunity",
+            "Producer_Code__c",
+            "Producer_Code__c", "=", @producerCode
+          )
+
+
+                            SET @rowCount = RowCount(@rows)
+
+                            IF @rowCount > 0 THEN
+                              VAR @createStatus
+                              SET @createStatus = CreateSalesforceObject(
+                                "Opportunity",
+                                13,
+                                    "AccountId", @subscriberKey,
+                                    "LeadSource", "(OLS) Targeted Offer",
+                                    "Producer_Code__c", @producerCode,
+                                    "StageName", "Open",
+                                    "Product_Type__c", "Investments",
+                                    "Type", "Xsell",
+                                    "Rating__c", "Hot",
+                                    "Action_By_Date__c", @sfmcDate,
+                                    "Name", "Client Requested Contact | Wealth X-sell",
+                                    "CloseDate", @sfmcDate,
+                                    "CampaignId", "701JR00000aPKreYAG",
+                                    "Campaign_Category__c", "a0vJR00000nftMpYAI",
+                                    "RecordTypeId", "012Ah0000004HVsIAM"
+                              )      
+
+                               SET @updatejourneydata = UpsertData(
+                                    "Wealth_x_sell_Journey_DE",
+                                    1,
+                                    "SubscriberKey", @subscriberKey,              
+                                    "CTA_Clicked", "True"
+                                    )      
+
+
+                              IF NOT EMPTY(@createStatus) THEN
+                                  IF @language == "French" THEN
+                                   Redirect("https://www.cooperators.ca/fr-ca/thank-you?utm_source=email&utm_medium=sfmc&utm_campaign=lifexsell&utm_term=wealth-cross-sell")
+                                  ELSE
+                                   Redirect("https://www.cooperators.ca/en/thank-you?utm_source=email&utm_medium=sfmc&utm_campaign=lifexsell&utm_term=wealth-cross-sell")
+                                  ENDIF
+                              ELSE
+                                SET @errorFlag = "true"
+                              ENDIF
+
+                            ELSE
+                              /* ProducerCode not found — set error flag */
+                              SET @errorFlag = "true"
+                            ENDIF
+                            
+                            
+                            Elseif empty (@producerCode) then
+                            
+                            SET @errorFlag = "true"
+                            
+                            
 ELSE
-SET @Header = "Get financial advice from a trusted partner"
-SET @BodyCopy = "Please confirm your request and a financial representative will connect with you shortly"
-SET @CTA = "Request a Call"
 ENDIF
-
-
-     IF @Language != 'French' THEN
-  /* default language taken as English */
-  SET @year_range = Concat("1997-",@year)
-  SET @footer_text = Concat("Copyright © ",@year_range, " Co-operators")
- ELSE
-  SET @year_range = Concat("2006-",@year)
-  SET @footer_text = Concat("© Co-operators","<sup>MD</sup>, ",@year_range)
- ENDIF
 ]%%
 
+%%[ IF @errorFlag == "true" THEN ]%%
 
+%%[
+/* Log to your DE */
+InsertData(
+  "GO_Journey_Error_Capture",
+  "Timestamp", Now(),
+  "AccountId", @subscriberKey,
+  "Producer_Code__c", @producerCode,
+  "Action_By_Date__c", Now(),
+  "LeadSource", "(OLS) Targeted Offer",           
+  "StageName", "Open",
+  "Product_Type__c", "Investments",
+  "Type", "Xsell",
+  "Rating__c", "Hot",
+  "Name", "Client Requested Contact | Wealth X-sell",
+  "CloseDate", Now(),
+  "CampaignId", "701JR00000aPKreYAG",
+  "Campaign_Category__c", "a0vJR00000nftMpYAI",
+  "RecordTypeId", "012Ah0000004HVsIAM"
+)
 
+UpsertData(
+   "Wealth_x_sell_Journey_DE",
+   1,
+   "SubscriberKey", @subscriberKey,              
+   "CTA_Clicked", "True"
+) 
 
-  <meta charset="UTF-8">
-  <title>Confirm Your Request</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  style
-    
-    .image_topbar_cls{position: fixed;top: 0px;left:0px;background: #fff;width: 100%;border-bottom:3px solid #006EB3 !important;}
-
-       @media only screen and (max-width: 480px) {
-      .logo_image{margin-left:10px!important;}
-      .logo_image{margin:20px 0px!important;}
-    }
-    body {
-      background: #f3f5f8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      font-family: manrope,avenir,arial,sans-serif;
-    }
-
-    h1 { font-size: 22px; color: #003366; margin-bottom: 1rem; font-weight: 700; }
-    p { color: #444; margin-bottom: 1.5rem; font-size: 0.95rem; }
-    label { font-weight: bold; display: block; margin-top: 12px; text-align: left; }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      color: #333;
-      background: #f9f9f9;
-    }
-    button {
-    --button-height: 3.125rem;
-    display: inline-flex;
-    padding-right: 15px;
-    padding-left: 15px;
-    margin-top: 20px;
-    align-items: center;
-    justify-content: center;
-    min-height: var(--button-height);
-    border: 1px solid;
-    border-radius: var(--button-height);
-    font-family: manrope,avenir,arial,sans-serif;
-    font-weight: 900;
-    font-style: normal;
-    /*line-height: 1.25;*/
-    text-align: center;
-    text-decoration: none;
-    letter-spacing: normal;
-    text-transform: none;
-    color: var(--colors-text-inverted);
-    transition: .2s;
-    cursor: pointer;
-    -webkit-font-smoothing: antialiased;
-    border:2px solid #006EB3;
-    color: #fff;
-    background-color: #006EB3;
-    transition: background-color .15s, color .15s;
-    }
-    button:hover { background-color: #005fa3; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    #statusMsg { margin-top: 1rem; color: green; display: none; }
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  background: #fff;
-  padding: 32px 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  max-width: 480px;
-  width: 90%;
-  width: auto;
-  justify-content: center;   /* centers horizontally */
-  align-items: center;       /* centers vertically */
-  font-family: manrope,avenir,arial,sans-serif;
-  margin-top: 35%;
-}
-    
-.footer {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    overflow-wrap: break-word;
-}
-
-.footer__row--border {
-    padding-top: 10px;
-    text-align: center !important;
-    margin: 0 auto !important;
-}
-
-.footer__list {
-    list-style-type: none;
-    line-height: 1.7em;
-    padding: 0;
-    margin: 20px;
-}
-
-ul {
-    display: block;
-    list-style-type: disc
-}
-
-.footer__list--inline .list__item {
-    display: inline-block;
-    text-align: center;
-    margin: 0 0.5em;
-    padding: 0 5px;
-}
-
-.footer__list--center {
-}
-
-.list__item i,
-.list__item a {
-    font-family: 'Manrope';
-    font-style: normal;
-    color: #231F20 !important;
-    display: block;
-    text-decoration: none;
-    transition: all 0.15s ease;
-}
-
-.footer-bottom {
-    font-family: 'Manrope';
-    font-style: normal;
-    text-align: center;
-    padding: 15px 0 15px 0;
-    color: #231F20 !important;
-}
-
-  </style>
-<table width="100%" cellspacing="0" cellpadding="0" role="presentation" class="image_topbar_cls">
-  <tr>
-    <td align="left"><img data-assetid="271591" src="https://image.message.REDACT.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
-  </tr>
-</table>
-
-
-  <div class="container">
-    <h1>%%=v(@Header)=%%</h1>
-    <p>%%=v(@BodyCopy)=%%</p>
-<img data-assetid="271591" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
-    <form id="ctaForm" method="GET">
-
-
-      <button id="continueBtn" type="submit">%%=v(@CTA)=%%</button>
-      <p id="statusMsg" style="display: none;"></p>
-    </form>
-  </div>
-
-
-  script
-    (function() {
-      const form = document.getElementById('ctaForm');
-      const btn = document.getElementById('continueBtn');
-      const msg = document.getElementById('statusMsg');
-      const ctaURL = "%%=v(@ctaURL)=%%";
-
-      btn.addEventListener('click', (e) => {
-        e.preventDefault(); // prevent form submission
-
-        // prevent double-click
-        if (btn.disabled) return;
-
-        btn.disabled = true;
-        msg.style.display = 'block';
-        msg.textContent = '';
-
-        // stop if this CTA has already been used in this browser/tab
-        if (sessionStorage.getItem('ctaClicked')) {
-          msg.textContent = 'Your request has already been submitted.';
-          return;
-        }
-
-        sessionStorage.setItem('ctaClicked', 'true');
-
-        // build query params
-        const params = new URLSearchParams(new FormData(form)).toString();
-
-        // redirect
-        window.location.href = `${ctaURL}&${params}`;
-      });
-    })();
-  SCRIPT
+IF @language == "French" THEN
+ Redirect("https://www.cooperators.ca/fr-ca/thank-you?utm_source=email&utm_medium=sfmc&utm_campaign=lifexsell&utm_term=wealth-cross-sell")
+ELSE
+ Redirect("https://www.cooperators.ca/en/thank-you?utm_source=email&utm_medium=sfmc&utm_campaign=lifexsell&utm_term=wealth-cross-sell")
+ENDIF
+]%%
+%%[ ENDIF ]%%
+<!-- SSJS -->
+<script runat="server">
+  } catch (e) {
+    Write("Logging error: " + Stringify(e));
+  }
+</script>
 
 
           </template>
