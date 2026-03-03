@@ -83,6 +83,75 @@
         border-radius: 4px;
         flex: 1 1 300px;
       }
+
+      /* ── Collapsible projects ── */
+      .project-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-bottom: 6px;
+      }
+
+      .project-header .project-title {
+        margin: 0;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        font-size: 11px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      /* hide subsections and direct pre/screenshots when project is collapsed */
+      .project.collapsed .subsection,
+      .project.collapsed > pre,
+      .project.collapsed > .screenshots {
+        display: none;
+      }
+
+      /* ── Collapsible subsections ── */
+      .subsection {
+        margin-bottom: 16px;
+      }
+
+      .subsection-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        margin-bottom: 8px;
+      }
+
+      .subsection-header .subsection-label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: bold;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .subsection-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 10px;
+        color: #bbb;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .subsection.collapsed pre,
+      .subsection.collapsed .screenshots {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -100,44 +169,1694 @@
 
       <!-- ── Project 1 ── -->
       <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
+        <p class="project-title">Preference Center</p>
+        <p class="project-desc">Cloud page with dedicated Preference Center functionality</p>
+      
+        <div class="screenshots">
+               <img src="assets/images/prefcenter.png" alt="Screenshot 1">
+               <img src="assets/images/thankyou.png" alt="Screenshot 1">
+        </div>
+        <div class="subsection">
+          <p class="subsection-label">Submission page</p>
+          <pre><code id="code-tmpl-html"></code></pre>
+          <template id="tmpl-tmpl-html"> // Preference Center Submission
+GOES HERE
+          </template>
+        </div>
 
-        <pre><code>// paste your code here
-function example() {
-  return "hello world";
-}</code></pre>
+        <div class="subsection">
+          <p class="subsection-label">Thank you page</p>
+          <pre><code id="code-tmpl-css"></code></pre>
+          <template id="tmpl-tmpl-css"> // Preference Center Thank you
 
+
+%%[
+    SET @submitted = RequestParameter("submitted")
+    SET @source = RequestParameter("source")
+    SET @FirstName = RequestParameter("FirstName")
+    SET @LastName = RequestParameter("LastName") 
+    SET @email =  RequestParameter("email")
+    SET @Language = RequestParameter("Language") 
+    SET @Province = RequestParameter("Province")
+    SET @subkey = RequestParameter("email")
+    SET @accountID = RequestParameter("AID")
+    SET @subkey = @accountID
+    SET @languageID = Lowercase(RequestParameter("lang"))
+    SET @isLead = RequestParameter("isLead")
+    /* new web lead flow */
+    SET @isWebLead = RequestParameter("isWebLead")
+    SET @group_client_data = RequestParameter("group_client_data")
+    SET @year = format(Now(1),"yyyy");
+    SET @marketingConsentRecordTypeId = "012Ah0000004HVqIAM" /*this is RecordTypeId for Marketing consent in Consent object*/
+    SET @QueryString = "";
+    /*for crm update date*/
+    SET @nowEST = DateAdd(Now(), 6, "H") 
+    SET @curr_date = Replace(FormatDate(@nowEST,"yyyy-MM-ddT","hh:mm:ss"),' ','')
+    /*for sfmc update date*/
+   /*SET @nowsfmcEST = DateAdd(Now(), 2, "H") */
+    SET @nowsfmcEST = SystemDateToLocalDate(Now())
+    SET @sfmc_curr_date = Replace(FormatDate(@nowsfmcEST,"yyyy-MM-ddT","hh:mm:ss"),' ','')
+    /* generating a guid for tracking history */
+    VAR @guid
+    SET @guid = GUID()
+
+    SET @environment = "Prod"
+   
+    
+
+    IF @environment == "Prod" THEN
+    SET @indexDE = "INDEX_PREFERENCES"
+    SET @recordTypesDE = "RECORD_TYPES_PREFERENCES"
+    SET @consentClientDE = "ENT.Consent__c_Salesforce_2"
+    SET @accountClientDE = "ENT.Account_Salesforce_2"
+    SET @prefDE = "EMAIL_PREFERENCE_CENTER"
+    ELSEIF @environment == "Prod-Test" THEN
+    SET @indexDE = "INDEX_PREFERENCES_TESTING"
+    SET @recordTypesDE = "RECORD_TYPES_PREFERENCES_TESTING"
+    SET @consentClientDE = "ENT.Consent__c_Salesforce_2"
+    SET @accountClientDE = "ENT.Account_Salesforce_2"
+    SET @prefDE = "EMAIL_PREFERENCE_CENTER_WEBFORM_TESTING"
+    ELSEIF @environment == "SITUAT" THEN 
+    SET @indexDE = "INDEX_PREFERENCES"
+    SET @recordTypesDE = "RECORD_TYPES_PREFERENCES"
+    SET @consentClientDE = "ENT.Consent__c_Salesforce_3"
+    SET @accountClientDE = "ENT.Account_Salesforce_3"
+    SET @prefDE = "EMAIL_PREFERENCE_CENTER"
+    ENDIF
+
+
+    
+    /*For update in CRM */
+    SET @AccountId = @accountID
+     
+     IF @languageID != 'fr' THEN
+      /* default language taken as English */
+      SET @languageID = 'en';
+      SET @title = "Email Preference Centre"
+      SET @year_range = Concat("1997-",@year)
+      SET @footer_text = Concat("Copyright © ",@year_range, " Co-operators")
+     ELSE
+      SET @languageID = 'fr'
+      SET @title = "Centre de gestion despréférences courriel"
+      SET @year_range = Concat("2006-",@year)
+      SET @footer_text = Concat("© Co-operators","<sup>MD</sup>, ",@year_range)
+     ENDIF
+     
+     IF not empty(@accountID) then        
+       SET @upsertData = UpsertData(@prefDE, 1,"SUBSCRIBER_KEY",@accountID,"EMAIL_ADDRESS",@email,
+        "FIRST_NAME",@FirstName,
+        "LAST_NAME",@LastName,
+        "PREFERRED_LANGUAGE",@Language,
+        "PROVINCE",@Province,
+        "IS_LEAD",@isLead,
+        "IS_WEB_LEAD",@isWebLead,
+        "LAST_UPDATED_DATE",@sfmc_curr_date)
+        /* History initial insert */
+        SET @insertDataHistory = InsertData("HISTORY_EMAIL_PREFERENCE_CENTER","SUBSCRIBER_KEY",@accountID,"EMAIL_ADDRESS",@email,
+        "IS_LEAD",@isLead,
+        "IS_WEB_LEAD",@isWebLead,
+        "TYPE", "Preference Center",
+        "LAST_UPDATED_DATE",@sfmc_curr_date,
+        "SUBSCRIBER_KEY",@accountID,
+        "HISTORY_ID", @guid)
+
+         /* New Web leads has CRM component on the Leads object use it to Confirm resub but only when current state of user is unsubbed from CRM Web Leads Not just for any preference change (source is true only on unsub all action)  *//
+    IF (@isWebLead == 'Yes' AND @source != 'true') THEN        
+        /* Retrieve Email marketing consent */
+        SET @webLeadRows = RetrieveSalesforceObjects(
+            "Lead",
+            "Email_Marketing_Consent__c",
+            "Id","=", @accountID            
+        )
+
+        SET @webLeadinfo = Row(@webLeadRows, 1)
+        SET @webLeadConsent = Field(@webLeadinfo, "Email_Marketing_Consent__c")
+
+        IF @webLeadConsent == "No" THEN
+             SET @result_unsub = UpdateSingleSalesforceObject("Lead", @accountID, "Email_Marketing_Consent__c","Yes", "Email_Marketing_Consent_Date__c", @curr_date)   
+
+        ENDIF
+    ENDIF
+       
+    ENDIF
+    
+    if not empty(RequestParameter("unsubscribe_checkbox_id_hidden")) then
+        if RequestParameter("unsubscribe_checkbox_id") == 'on' then    
+            SET @unsubscribe_checkbox_id = true
+            SET @unsub_source = "Preference Page"
+        else
+            SET @unsubscribe_checkbox_id = false
+            SET @unsub_source = ""
+        endif
+        SET @upsertData = UpsertData(@prefDE, 1,"SUBSCRIBER_KEY",@accountID,"UNSUBSCRIBE_FROM_ALL_EMAILS",@unsubscribe_checkbox_id,"UNSUBSOURCE",@unsub_source,"LAST_UPDATED_DATE",@sfmc_curr_date)
+        /* History */
+        SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "UNSUBSCRIBE_FROM_ALL_EMAILS",@unsubscribe_checkbox_id,"UNSUBSOURCE",@unsub_source,"SUBSCRIBER_KEY",@accountID)
+    endif
+    
+     IF @isLead == "Yes" THEN 
+        IF not empty(@AccountId) THEN
+            if not empty(RequestParameter("auto_quote_id_hidden")) then
+                if RequestParameter("auto_quote_id") == 'on' then    
+                    SET @auto_quote_id = true
+                    SET @auto_quote_crm = "Yes"
+                else
+                    SET @auto_quote_id = false
+                    SET @auto_quote_crm = "No"
+                endif
+                SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"AUTO_QUOTE",@auto_quote_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+                /* History */
+                SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "AUTO_QUOTE",@auto_quote_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+                
+                /*for updating all auto consent data in crm*/
+                SET @autoConsent = RetrieveSalesforceObjects("Lead_Consent__c","Product_Type__c,Id", "Related_Lead__c", "=", @AccountId,"Product_Type__c", "=", "Auto") 
+                
+                
+                SET @autoConsentDetailsRowCount = rowcount(@autoConsent)
+                IF @autoConsentDetailsRowCount > 0 THEN
+                    FOR @j = 1 to @autoConsentDetailsRowCount do
+                        SET @autoLeadDetailsRow = row(@autoConsent, @j)
+                        SET @autoLeadConsentId = field(@autoLeadDetailsRow,"Id")
+                        /*For update in CRM */
+                        IF not empty(@autoLeadConsentId) THEN
+                            set @result = UpdateSingleSalesforceObject("Lead_Consent__c", @autoLeadConsentId,"Marketing_Consent__c", @auto_quote_crm, "Marketing_Consent_Date_Time__c", @curr_date)
+                        ENDIF
+                    NEXT @j
+                ELSE
+                    SET @createResult = CreateSalesforceObject(
+                        "Lead_Consent__c", 4,
+                        "Related_Lead__c",@AccountId,
+                        "Product_Type__c", "Auto",
+                        "Marketing_Consent__c", @auto_quote_crm,
+                        "Marketing_Consent_Date_Time__c", @curr_date
+                    )
+                ENDIF
+            endif
+        
+            if not empty(RequestParameter("home_quote_id_hidden")) then
+                if RequestParameter("home_quote_id") == 'on' then    
+                    SET @home_quote_id = true
+                    SET @home_quote_crm = "Yes"
+                else
+                    SET @home_quote_id = false
+                    SET @home_quote_crm = "No"
+                endif
+                SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"HOME_QUOTE",@home_quote_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+                /* History */
+                SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1,"HISTORY_ID", @guid, "HOME_QUOTE",@home_quote_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+                /*for updating all Home consent data in crm*/
+                SET @homeConsent = RetrieveSalesforceObjects("Lead_Consent__c","Product_Type__c,Id", "Related_Lead__c", "=", @AccountId,"Product_Type__c", "=", "Habitational") 
+                
+                SET @homeConsentDetailsRowCount = rowcount(@homeConsent)
+                IF @homeConsentDetailsRowCount > 0 THEN
+                    FOR @j = 1 to @homeConsentDetailsRowCount do
+                        SET @homeLeadDetailsRow = row(@homeConsent, @j)
+                        SET @homeLeadConsentId = field(@homeLeadDetailsRow,"Id")
+                        /*For update in CRM */
+                        IF not empty(@homeLeadConsentId) THEN
+                            set @result = UpdateSingleSalesforceObject("Lead_Consent__c", @homeLeadConsentId,"Marketing_Consent__c", @home_quote_crm, "Marketing_Consent_Date_Time__c", @curr_date)
+                        ENDIF
+                    NEXT @j
+                ELSE
+                    SET @createResult = CreateSalesforceObject(
+                        "Lead_Consent__c", 4,
+                        "Related_Lead__c",@AccountId,
+                        "Product_Type__c", "Habitational",
+                        "Marketing_Consent__c", @home_quote_crm,
+                        "Marketing_Consent_Date_Time__c", @curr_date
+                    )
+                ENDIF
+            endif
+
+        ENDIF
+    ELSE
+        IF not empty(@AccountId) THEN
+          SET @ConsentId = Lookup(@consentClientDE,"Id","Account__c",@AccountId,"RecordTypeId",@marketingConsentRecordTypeId)
+        ENDIF
+        
+/*Start block to handle Persisting data corrsp to one UI element*/
+/*For adding additional fields:
+the request parameters come from page 1 whose interface is loaded from INDEX_PREFERENCES DE the ids for the UI elements come from this field:
+CHECKBOX_FRONT_END_ID the pattern is checkbox, hidden field matching checkbox state, label holding title and details
+E.g. Field in Pref center DE:
+BUSINESS_OWNER_ADVICE_PERIODICALLY
+Word before first _ is section e.g. Business
+Words after first _ are title for label e.g. Business-owner advice (periodically)
+Fields that map to CRM that would normally be boolean are "Yes" and "No" maybe because that matches labels in the UI in CRM systems
+*/
+ if not empty(RequestParameter("business_owner_advice_id_hidden")) then
+            if RequestParameter("business_owner_advice_id") == 'on' then    
+                SET @business_owner_advice_id = true
+                SET @business_owner_advice_crm = "Yes"
+            else
+                SET @business_owner_advice_id = false
+                SET @business_owner_advice_crm = "No"
+            endif
+            SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"BUSINESS_OWNER_ADVICE_PERIODICALLY",@business_owner_advice_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+            /* History */
+            SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1,"HISTORY_ID", @guid, "BUSINESS_OWNER_ADVICE_PERIODICALLY",@business_owner_advice_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+            /*For update in CRM */
+            IF not empty(@ConsentId) THEN
+              set @result = UpdateSingleSalesforceObject("Consent__c", @ConsentId,"NewsLetters_for_Business_Owners__c", @business_owner_advice_crm, "Marketing_Preferences_Last_Updated_Date__c", @curr_date, "Consent_Last_Updated_Date__c", @curr_date)
+            ENDIF
+        endif
+/*END block to handle Persisting data corrsp to one UI element*/
+        
+        if not empty(RequestParameter("general_extreme_weather_id_hidden")) then
+            if RequestParameter("general_extreme_weather_id") == 'on' then    
+                SET @general_extreme_weather_id = true
+                SET @general_extreme_weather_crm = "Yes"
+            else
+                SET @general_extreme_weather_id = false
+                SET @general_extreme_weather_crm = "No"
+            endif
+            SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS",@general_extreme_weather_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+            /* History */
+            SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS",@general_extreme_weather_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+            /*For update in CRM */
+            IF not empty(@ConsentId) THEN
+              set @result = UpdateSingleSalesforceObject("Consent__c", @ConsentId,"Alerts_Reminders__c", @general_extreme_weather_crm, "Marketing_Preferences_Last_Updated_Date__c", @curr_date, "Consent_Last_Updated_Date__c", @curr_date)
+            ENDIF
+        endif
+        
+        if not empty(RequestParameter("general_insurance_investment_id_hidden"))then
+            if RequestParameter("general_insurance_investment_id") == 'on' then    
+                SET @general_insurance_investment_id = true
+                SET @general_insurance_investment_crm = "Yes"
+            else
+                SET @general_insurance_investment_id = false
+                SET @general_insurance_investment_crm = "No"
+            endif
+            SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY",@general_insurance_investment_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+            /* History */
+            SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY",@general_insurance_investment_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+            /*For update in CRM */
+            IF not empty(@ConsentId) THEN
+              set @result = UpdateSingleSalesforceObject("Consent__c", @ConsentId,"Newsletters__c", @general_insurance_investment_crm, "Marketing_Preferences_Last_Updated_Date__c", @curr_date, "Consent_Last_Updated_Date__c", @curr_date)
+            ENDIF
+        endif
+        
+        if not empty(RequestParameter("general_products_and_services_id_hidden")) then
+            if RequestParameter("general_products_and_services_id") == 'on' then    
+                SET @general_products_and_services_id = true
+                SET @general_products_and_services_crm = "Yes"
+            else
+                SET @general_products_and_services_id = false
+                SET @general_products_and_services_crm = "No"
+            endif
+            SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY",@general_products_and_services_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+            /* History */
+            SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY",@general_products_and_services_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+            /*For update in CRM */
+            IF not empty(@ConsentId) THEN
+              set @result = UpdateSingleSalesforceObject("Consent__c", @ConsentId,"Campaigns__c", @general_products_and_services_crm, "Marketing_Preferences_Last_Updated_Date__c", @curr_date, "Consent_Last_Updated_Date__c", @curr_date)
+            ENDIF
+        endif
+        
+       /* updates that do not depend on CRM */
+
+        if not empty(RequestParameter("finance_market_id_hidden")) then
+            if RequestParameter("finance_market_id") == 'on' then    
+                SET @finance_market_id = true
+            else
+                SET @finance_market_id = false
+            endif
+            SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"FINANCE_FINANCIAL_MARKET_UPDATES_AND_INSIGHTS",@finance_market_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+            /* History */
+           SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "FINANCE_FINANCIAL_MARKET_UPDATES_AND_INSIGHTS",@finance_market_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+        endif
+        
+]%%
+
+%%[
+        
+        if not empty(RequestParameter("finance_wealth_id_hidden")) then
+            if RequestParameter("finance_wealth_id") == 'on' then    
+                SET @finance_wealth_and_personal_id = true
+            else
+                SET @finance_wealth_and_personal_id = false
+            endif
+            SET @upsertData = UpsertData(@prefDE,1 ,"SUBSCRIBER_KEY",@accountID,"FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT",@finance_wealth_and_personal_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+            /* History */
+           SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT",@finance_wealth_and_personal_id,"LAST_UPDATED_DATE",@sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)
+        endif
+       
+        
+        if not empty(RequestParameter("business_group_support_id_hidden")) then
+            if RequestParameter("business_group_support_id") == 'on' then    
+                SET @business_group_support_id = true
+            else
+                SET @business_group_support_id = false
+            endif
+            SET @upsertData = UpsertData(@prefDE,1, "SUBSCRIBER_KEY",@accountID,"BUSINESS_GROUP_BENEFITS_PERIODICALLY",@business_group_support_id,"LAST_UPDATED_DATE",@sfmc_curr_date)
+        endif
+        
+    ENDIF
+    
+  /* All Subscribers Data Extension update when user unsubscribes */
+  IF @subkey != "" THEN
+  
+      IF @submitted == 'true' AND @source == 'true' THEN
+        
+
+        /* New Web leads has a small CRM component on the Leads object    */
+        IF @isWebLead == 'Yes' THEN
+        /*unsub from CRM Web Leads*/
+        SET @result_unsub = UpdateSingleSalesforceObject("Lead", @accountID, "Email_Marketing_Consent__c","No", "Email_Marketing_Consent_Date__c", @curr_date)
+
+        ELSE
+        /*unsub from CRM
+        added update to "Marketing_Preferences_Last_Updated_Date__c" */
+        SET @result_unsub = UpdateSingleSalesforceObject("Consent__c", @ConsentId,"Alerts_Reminders__c","No","Newsletters__c","No","Campaigns__c","No", "Marketing_Preferences_Last_Updated_Date__c", @curr_date,"Consent_Last_Updated_Date__c", @curr_date)
+
+        ENDIF
+        
+        /*unsub from MC*/
+         SET @upsertUnsubData = UpsertData(@prefDE, 1 , "SUBSCRIBER_KEY", @accountID, "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS", "False", "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY","False", "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY","False", "FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT","False", "BUSINESS_GROUP_BENEFITS_PERIODICALLY", "False", "LAST_UPDATED_DATE", @sfmc_curr_date)
+         /* History Unsub all - 6 prefs */
+         SET @upsertDataHistory = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER", 1, "HISTORY_ID", @guid, "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS", "False", "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY","False", "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY","False", "FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT","False", "BUSINESS_GROUP_BENEFITS_PERIODICALLY", "False", "LAST_UPDATED_DATE", @sfmc_curr_date,"SUBSCRIBER_KEY",@accountID)                
+         
+
+      /*All Subscribers unsubscribe Update here*/
+      VAR @skey, @jid, @reason, @lue, @lue_prop, @lue_statusCode, @overallStatus, @requestId, @Response, @Status, @Error
+
+      SET @skey = @subkey
+      SET @jid = RequestParameter("jobid")
+      SET @listid = RequestParameter("listid")
+      SET @batchid = RequestParameter("batchid")
+      SET @reason = "Preference Center"
+
+      SET @lue = CreateObject("ExecuteRequest")
+      SetObjectProperty(@lue,"Name","LogUnsubEvent")
+      
+      SET @lue_prop = CreateObject("APIProperty")                 
+      SetObjectProperty(@lue_prop, "Name", "SubscriberKey")
+      SetObjectProperty(@lue_prop, "Value", @skey)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "JobID")
+      SetObjectProperty(@lue_prop, "Value", @jid)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "ListID")
+      SetObjectProperty(@lue_prop, "Value", @listid)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "BatchID")
+      SetObjectProperty(@lue_prop, "Value", @batchid)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+      
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "Date Modified")
+      SetObjectProperty(@lue_prop, "Value", @sfmc_curr_date)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")m
+      SetObjectProperty(@lue_prop, "Name", "Reason")
+      SetObjectProperty(@lue_prop, "Value", @reason)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_statusCode = InvokeExecute(@lue, @overallStatus, @requestId)
+
+      SET @Response = Row(@lue_statusCode, 1)
+      SET @Status = Field(@Response,"StatusMessage")
+      SET @Error = Field(@Response,"ErrorCode")
+      
+      ELSE
+        set @sub = CreateObject("Subscriber")
+        setObjectProperty(@sub, "SubscriberKey", @subkey)
+        setObjectProperty(@sub, "Status", "Active")
+        set @statusCode = InvokeUpdate(@sub, @statusMsg, @errorCode)
+      ENDIF
+      
+   ENDIF
+
+  ]%%
+%%[IF @languageID == 'fr' AND @isLead == "Yes" THEN ]%% Centre de gestion des préférences de courriel – Soumissions auto et habitation %%[ELSEIF @languageID == 'en' AND @isLead == "Yes" THEN]%% Home and Auto Quote Email Preference Centre %%[ELSEIF @languageID == 'fr' AND @group_client_data == "Yes" THEN ]%% Assurance groupe habitation et automobile – Centre de gestion des préférences de courriel %%[ELSEIF @languageID == 'en' AND @group_client_data == "Yes" THEN]%% Group Home and Auto Insurance – Email Preference Center %%[ELSEIF @languageID == 'fr' THEN]%% Centre de gestion despréférences courriel  %%[ELSE]%% Email Preference Centre  %%[ENDIF]%%
+
+<title>%%=v(@title)=%%</title>
+<div class="thankyou_desc">
+ <div>
+  <span class="thankyou_desc_span">
+    %%[ IF @languageID == 'fr' THEN ]%% Merci. Nous avons mis à jour vos préférences en matière de courriels.  %%[ELSE]%% Thank you. We noted your updated email preferences.&nbsp;&nbsp; %%[ENDIF]%%
+   </span>
+  </div>
+</div>
+
+
+<div class="cust_container unsubscribe_desc_span">
+    <div class="footer__row footer__row--border mktoText" id="footer-legal-text">
+        <ul class="footer__list footer__list--inline footer__list--center">
+           %%[ IF @languageID == 'en' AND @isLead == "Yes" THEN ]%%
+          <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"> <u>Legal</u> </a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u> Privacy </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u> Contact Us </u></a></li>
+           %%[ ELSEIF @languageID == 'fr' AND @isLead == "Yes" THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+          %%[ ELSEIF @languageID == 'fr' AND @group_client_data == "Yes" THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/legal.aspx"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy-Policy.aspx"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/contact-us.aspx"><u>Contactez-nous </u></a></li>
+          %%[ ELSEIF @languageID == 'en' AND @group_client_data == "Yes" THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/legal.aspx"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy-Policy.aspx"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/contact-us.aspx"><u>Contact Us</u></a></li>
+          %%[ ELSEIF @languageID == 'fr' THEN ]%%
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+          %%[ELSE]%% 
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u>Contact Us</u></a></li>
+          %%[ENDIF]%%
+        </ul>
+    </div>
+</div>
+
+
+
+          </template>
+        </div>
+      </div>
+      <div class="project">
+        <p class="project-title">Opportunity Creation & Double Opt-in</p>
+        <p class="project-desc">Cloudpage mediary that creates an opportunity in SFDC based off SFMC attributes</p>
+      
+        <div class="screenshots">
+               <img src="assets/images/doi.png" alt="Screenshot 2">
+        </div>
+                <div class="subsection">
+          <p class="subsection-label">Double Opt-in</p>
+          <pre><code id="code-tmpl-jsherobanner"></code></pre>
+          <template id="tmpl-tmpl-jsherobanner"> // 
+(%%[
+/* Retrieve encrypted query parameters from the URL */
+VAR @SubscriberKey, @ProducerCode, @Language, @ctaURL, @Header, @BodyCopy, @CTA
+SET @SubscriberKey = QueryParameter("SubscriberKey")
+SET @ProducerCode = QueryParameter("ProducerCode")
+SET @Province = QueryParameter("Province")
+SET @Language = QueryParameter("Language")
+SET @year = Format(Now(), "yyyy")
+
+IF @Province == 'Quebec' OR @Province == 'QC'
+THEN
+SET @ctaURL = CloudPagesURL(5738, 'SubscriberKey', @SubscriberKey, 'ProducerCode', @ProducerCode, 'Language', @Language)
+ELSE
+SET @ctaURL = CloudPagesURL(5501, 'SubscriberKey', @SubscriberKey, 'ProducerCode', @ProducerCode, 'Language', @Language)
+ENDIF
+
+IF @Language == 'French'
+THEN
+SET @Header = "Profitez des conseils financiers d’un partenaire de confiance"
+SET @BodyCopy = "Veuillez confirmer votre demande, et un représentant ou une représentante communiquera avec vous sous peu"
+SET @CTA = "Oui, demander un appel"
+ELSE
+SET @Header = "Get financial advice from a trusted partner"
+SET @BodyCopy = "Please confirm your request and a financial representative will connect with you shortly"
+SET @CTA = "Request a Call"
+ENDIF
+
+
+     IF @Language != 'French' THEN
+  /* default language taken as English */
+  SET @year_range = Concat("1997-",@year)
+  SET @footer_text = Concat("Copyright © ",@year_range, " Co-operators")
+ ELSE
+  SET @year_range = Concat("2006-",@year)
+  SET @footer_text = Concat("© Co-operators","<sup>MD</sup>, ",@year_range)
+ ENDIF
+]%%
+
+
+
+
+  <meta charset="UTF-8">
+  <title>Confirm Your Request</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    
+    .image_topbar_cls{position: fixed;top: 0px;left:0px;background: #fff;width: 100%;border-bottom:3px solid #006EB3 !important;}
+
+       @media only screen and (max-width: 480px) {
+      .logo_image{margin-left:10px!important;}
+      .logo_image{margin:20px 0px!important;}
+    }
+    body {
+      background: #f3f5f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: manrope,avenir,arial,sans-serif;
+    }
+
+    h1 { font-size: 22px; color: #003366; margin-bottom: 1rem; font-weight: 700; }
+    p { color: #444; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    label { font-weight: bold; display: block; margin-top: 12px; text-align: left; }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: #333;
+      background: #f9f9f9;
+    }
+    button {
+    --button-height: 3.125rem;
+    display: inline-flex;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 20px;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--button-height);
+    border: 1px solid;
+    border-radius: var(--button-height);
+    font-family: manrope,avenir,arial,sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    /*line-height: 1.25;*/
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--colors-text-inverted);
+    transition: .2s;
+    cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+    border:2px solid #006EB3;
+    color: #fff;
+    background-color: #006EB3;
+    transition: background-color .15s, color .15s;
+    }
+    button:hover { background-color: #005fa3; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #statusMsg { margin-top: 1rem; color: green; display: none; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  background: #fff;
+  padding: 32px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  width: auto;
+  justify-content: center;   /* centers horizontally */
+  align-items: center;       /* centers vertically */
+  font-family: manrope,avenir,arial,sans-serif;
+  margin-top: 35%;
+}
+    
+.footer {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+.footer__row--border {
+    padding-top: 10px;
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+.footer__list {
+    list-style-type: none;
+    line-height: 1.7em;
+    padding: 0;
+    margin: 20px;
+}
+
+ul {
+    display: block;
+    list-style-type: disc
+}
+
+.footer__list--inline .list__item {
+    display: inline-block;
+    text-align: center;
+    margin: 0 0.5em;
+    padding: 0 5px;
+}
+
+.footer__list--center {
+}
+
+.list__item i,
+.list__item a {
+    font-family: 'Manrope';
+    font-style: normal;
+    color: #231F20 !important;
+    display: block;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.footer-bottom {
+    font-family: 'Manrope';
+    font-style: normal;
+    text-align: center;
+    padding: 15px 0 15px 0;
+    color: #231F20 !important;
+}
+
+  </style>
+<table width="100%" cellspacing="0" cellpadding="0" role="presentation" class="image_topbar_cls">
+  <tr>
+    <td align="left"><img data-assetid="271591" src="https://image.message.cooperators.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
+  </tr>
+</table>
+
+
+  <div class="container">
+    <h1>%%=v(@Header)=%%</h1>
+    <p>%%=v(@BodyCopy)=%%</p>
+<img data-assetid="271591" src="https://image.dev-message.cooperators.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
+    <form id="ctaForm" method="GET">
+
+
+      <button id="continueBtn" type="submit">%%=v(@CTA)=%%</button>
+      <p id="statusMsg" style="display: none;"></p>
+    </form>
+  </div>
+
+
+
+
+          </template>
+        </div>
+        <div class="subsection">
+          <p class="subsection-label">Opportunity Creation from DOI</p>
+          <pre><code id="code-tmpl-cssopp"></code></pre>
+          <template id="tmpl-tmpl-cssopp"> //
+%%[
+/* Retrieve encrypted query parameters from the URL */
+VAR @SubscriberKey, @ProducerCode, @Language, @ctaURL, @Header, @BodyCopy, @CTA
+SET @SubscriberKey = QueryParameter("SubscriberKey")
+SET @ProducerCode = QueryParameter("ProducerCode")
+SET @Province = QueryParameter("Province")
+SET @Language = QueryParameter("Language")
+SET @year = Format(Now(), "yyyy")
+
+IF @Province == 'Quebec' OR @Province == 'QC'
+THEN
+SET @ctaURL = CloudPagesURL(5738, 'SubscriberKey', @SubscriberKey, 'ProducerCode', @ProducerCode, 'Language', @Language)
+ELSE
+SET @ctaURL = CloudPagesURL(5501, 'SubscriberKey', @SubscriberKey, 'ProducerCode', @ProducerCode, 'Language', @Language)
+ENDIF
+
+IF @Language == 'French'
+THEN
+SET @Header = "Profitez des conseils financiers d’un partenaire de confiance"
+SET @BodyCopy = "Veuillez confirmer votre demande, et un représentant ou une représentante communiquera avec vous sous peu"
+SET @CTA = "Oui, demander un appel"
+ELSE
+SET @Header = "Get financial advice from a trusted partner"
+SET @BodyCopy = "Please confirm your request and a financial representative will connect with you shortly"
+SET @CTA = "Request a Call"
+ENDIF
+
+
+     IF @Language != 'French' THEN
+  /* default language taken as English */
+  SET @year_range = Concat("1997-",@year)
+  SET @footer_text = Concat("Copyright © ",@year_range, " Co-operators")
+ ELSE
+  SET @year_range = Concat("2006-",@year)
+  SET @footer_text = Concat("© Co-operators","<sup>MD</sup>, ",@year_range)
+ ENDIF
+]%%
+
+
+
+
+  <meta charset="UTF-8">
+  <title>Confirm Your Request</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  style
+    
+    .image_topbar_cls{position: fixed;top: 0px;left:0px;background: #fff;width: 100%;border-bottom:3px solid #006EB3 !important;}
+
+       @media only screen and (max-width: 480px) {
+      .logo_image{margin-left:10px!important;}
+      .logo_image{margin:20px 0px!important;}
+    }
+    body {
+      background: #f3f5f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: manrope,avenir,arial,sans-serif;
+    }
+
+    h1 { font-size: 22px; color: #003366; margin-bottom: 1rem; font-weight: 700; }
+    p { color: #444; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    label { font-weight: bold; display: block; margin-top: 12px; text-align: left; }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      color: #333;
+      background: #f9f9f9;
+    }
+    button {
+    --button-height: 3.125rem;
+    display: inline-flex;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 20px;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--button-height);
+    border: 1px solid;
+    border-radius: var(--button-height);
+    font-family: manrope,avenir,arial,sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    /*line-height: 1.25;*/
+    text-align: center;
+    text-decoration: none;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--colors-text-inverted);
+    transition: .2s;
+    cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+    border:2px solid #006EB3;
+    color: #fff;
+    background-color: #006EB3;
+    transition: background-color .15s, color .15s;
+    }
+    button:hover { background-color: #005fa3; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #statusMsg { margin-top: 1rem; color: green; display: none; }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  background: #fff;
+  padding: 32px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  width: auto;
+  justify-content: center;   /* centers horizontally */
+  align-items: center;       /* centers vertically */
+  font-family: manrope,avenir,arial,sans-serif;
+  margin-top: 35%;
+}
+    
+.footer {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    overflow-wrap: break-word;
+}
+
+.footer__row--border {
+    padding-top: 10px;
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+.footer__list {
+    list-style-type: none;
+    line-height: 1.7em;
+    padding: 0;
+    margin: 20px;
+}
+
+ul {
+    display: block;
+    list-style-type: disc
+}
+
+.footer__list--inline .list__item {
+    display: inline-block;
+    text-align: center;
+    margin: 0 0.5em;
+    padding: 0 5px;
+}
+
+.footer__list--center {
+}
+
+.list__item i,
+.list__item a {
+    font-family: 'Manrope';
+    font-style: normal;
+    color: #231F20 !important;
+    display: block;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.footer-bottom {
+    font-family: 'Manrope';
+    font-style: normal;
+    text-align: center;
+    padding: 15px 0 15px 0;
+    color: #231F20 !important;
+}
+
+  </style>
+<table width="100%" cellspacing="0" cellpadding="0" role="presentation" class="image_topbar_cls">
+  <tr>
+    <td align="left"><img data-assetid="271591" src="https://image.message.cooperators.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
+  </tr>
+</table>
+
+
+  <div class="container">
+    <h1>%%=v(@Header)=%%</h1>
+    <p>%%=v(@BodyCopy)=%%</p>
+<img data-assetid="271591" src="https://image.dev-message.cooperators.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
+    <form id="ctaForm" method="GET">
+
+
+      <button id="continueBtn" type="submit">%%=v(@CTA)=%%</button>
+      <p id="statusMsg" style="display: none;"></p>
+    </form>
+  </div>
+
+
+  script
+    (function() {
+      const form = document.getElementById('ctaForm');
+      const btn = document.getElementById('continueBtn');
+      const msg = document.getElementById('statusMsg');
+      const ctaURL = "%%=v(@ctaURL)=%%";
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault(); // prevent form submission
+
+        // prevent double-click
+        if (btn.disabled) return;
+
+        btn.disabled = true;
+        msg.style.display = 'block';
+        msg.textContent = '';
+
+        // stop if this CTA has already been used in this browser/tab
+        if (sessionStorage.getItem('ctaClicked')) {
+          msg.textContent = 'Your request has already been submitted.';
+          return;
+        }
+
+        sessionStorage.setItem('ctaClicked', 'true');
+
+        // build query params
+        const params = new URLSearchParams(new FormData(form)).toString();
+
+        // redirect
+        window.location.href = `${ctaURL}&${params}`;
+      });
+    })();
+  SCRIPT
+
+
+          </template>
+        </div>
+        </div>
         <div class="screenshots">
           <!-- <img src="assets/images/screenshot1.png" alt="Screenshot 1"> -->
         </div>
-      </div>
-
-      <!-- ── Project 2 ── -->
       <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// paste your code here</code></pre>
-
+        <p class="project-title">Webform Intake</p>
+        <p class="project-desc">Webform Intake - cloudpage logic built to deal with webform submissions</p>
+      
         <div class="screenshots">
-          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
+               <img src="assets/images/wealthform.png" alt="Screenshot 2">
         </div>
-      </div>
+        <div class="subsection">
+          <p class="subsection-label">Wealth Webform Sample</p>
+          <pre><code id="code-tmpl-htmlherobanner"></code></pre>
+          <template id="tmpl-tmpl-htmlherobanner"> // 
+<script runat="server">
+    Platform.Load('Core','1');    
+  try{
+</script>
+%%[
+   
+     VAR @FirstName, @LastName, @Email, @Result, @AccountRows, @LeadRows, @createResult, @subscriberRow, @Id, @updateRecord, @State, @Leadinfo, @ConsentRows, @updateconsentRecord, @typeofleadvalue, @skey
 
-      <!-- ── Project 3 ── -->
-      <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
+    /* generating a guid for tracking history */
+    VAR @guid
+    SET @guid = GUID()
 
-        <pre><code>// paste your code here</code></pre>
+    /* Retrieve form values */
+    
+  
 
-        <div class="screenshots">
-          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
+     IF RequestParameter("submitted") == "true" THEN 
+        SET @FirstName = RequestParameter("FirstName")
+        SET @LastName = RequestParameter("LastName")
+        SET @Email = Lowercase(RequestParameter("Email"))
+        SET @Country = "Canada"
+        SET @State = RequestParameter("State")
+        SET @Language = RequestParameter("Language")
+        
+        /*
+        SET @nowsfmcEST = DateAdd(Now(), 2, "H") 
+        SET @sfmc_curr_date = Replace(FormatDate(@nowsfmcEST,"yyyy-MM-     ddT","hh:mm:ss"),' ','')
+        
+        */
+        
+        
+        
+  
+    /*for sfmc update date*/
+    SET @nowsfmcEST = SystemDateToLocalDate(Now())
+    SET @sfmc_curr_date = Replace(FormatDate(@nowsfmcEST,"yyyy-MM-ddT","hh:mm:ss"),' ','')
+
+        
+        
+               
+        SET @Product_of_interest = "Investments"
+        SET @Type_of_Lead = "Wealth"
+
+        SET @LeadSource = "Online"
+        SET @utm_source = RequestParameter("utm_source")
+        SET @utm_campaign = RequestParameter("utm_campaign")
+        SET @utm_content = RequestParameter("utm_content")
+        SET @utm_medium = RequestParameter("utm_medium")
+
+        /* Set the object name and record type name */
+        SET @objectName = "Lead" /* Replace with your actual object name */
+        SET @recordTypeName = "CRM Lead" /* Replace with your actual record type name */
+        
+        /* Set the object name and record type name */
+        SET @ConsentObjectName = "Consent__c" /* Replace with your actual object name */
+        SET @ConsentrecordTypeName = "Marketing & Communications" /* Replace with your actual record type name */
+
+     
+/* Define Triggered Send */
+       SET @triggeredsend = CreateObject("TriggeredSend")
+       SET @triggeredsenddefinition = CreateObject("TriggeredSendDefinition")
+       
+/* Replace External Key with Triggered Send External Key */
+       SetObjectProperty(@triggeredsenddefinition, "CustomerKey", "141790")
+       SetObjectProperty(@triggeredsend, "TriggeredSendDefinition", @triggeredsenddefinition)
+
+ 
+/* compare inserted data in form with crm-existing Account object contacts */
+           
+        SET @AccountRows = RetrieveSalesforceObjects(
+
+           "Account",
+           "FirstName,LastName,PersonEmail,Id,PersonMailingState,SFMC_IND__c",
+           "FirstName", "=", @FirstName,
+           "PersonEmail", "=", @Email,
+           "LastName", "=", @LastName,
+           "SFMC_IND__c", "=", "True"
+         )
+         
+
+       SET @LeadRows = RetrieveSalesforceObjects(
+
+           "Lead",
+           "FirstName,LastName,Email,Id,Product_of_interest__c,State,Record_Type__c",
+           "FirstName", "=", @FirstName,
+           "Email", "=", @Email,
+           "LastName", "=", @LastName,
+           "Record_Type__c", "!=", "Digital"
+         )  
+
+/*If both Account and Lead exist, redirect to thank you page */
+
+ IF RowCount(@AccountRows) > 0 THEN
+ 
+  
+  SET @Accountinfo = Row(@AccountRows, 1)
+  set @AccountId = Field(@Accountinfo, "Id")
+  set @State = Field(@Accountinfo, "PersonMailingState")
+  set @Email = Field(@Accountinfo, "PersonEmail")
+ 
+  /* Logic to update All Subscribers list */
+  set @sub = CreateObject("Subscriber")
+  setObjectProperty(@sub, "SubscriberKey", @AccountId)
+  setObjectProperty(@sub, "Status", "Active")
+  set @statusCode = InvokeUpdate(@sub, @statusMsg, @errorCode)
+
+     
+  
+
+     SET @ConsentRows = RetrieveSalesforceObjects(
+           "Consent__c",
+           "Account__c,Id,Campaigns__c,Newsletters__c,Alerts_Reminders__c,NewsLetters_for_Business_Owners__c",
+           "Account__c", "=", @AccountId,
+           "Campaigns__c", "!=", ""
+           )
+         
+  SET @Consentinfo = Row(@ConsentRows, 1)
+  SET @ConsentId = Field(@Consentinfo, "Id")
+    SET @newsletter = Field(@Consentinfo, "Newsletters__c")
+  IF @newsletter == "Yes" then
+  SET @newsletter = "true"
+  ELSE
+  SET @newsletter = "false"
+  ENDIF
+  
+  SET @Alertreminders = Field(@Consentinfo, "Alerts_Reminders__c")
+  IF @Alertreminders == "Yes" then
+  SET @Alertreminders = "true"
+  ELSE
+  SET @Alertreminders = "false"
+  ENDIF
+  
+  SET @newsletterforbusiness = Field(@Consentinfo, "NewsLetters_for_Business_Owners__c")
+  IF @newsletterforbusiness == "Yes" then
+  SET @newsletterforbusiness = "true"
+  ELSE
+  SET @newsletterforbusiness = "false"
+  ENDIF
+  
+     /*Set subscriber object at Consent Level */                                 
+      SET @updateconsentRecord = UpdateSingleSalesforceObject(
+                                     "Consent__c", @ConsentId,
+                                     "Campaigns__c", "Yes",
+                                     "Consent_Last_Updated_Date__c", @sfmc_curr_date,
+                                     "Marketing_Preferences_Last_Updated_Date__c", @sfmc_curr_date
+                                     )
+
+  SET @datainsert = UpsertData("Wealth_web_form_de",1, 
+                                   "SubscriberKey",@AccountId, 
+                                   "FirstName",@FirstName, 
+                                   "LastName",@LastName, 
+                                   "Email",@Email,
+                                   "Language",@Language,
+                                   "Province",@State,
+                                   "Existing_Client", "Yes",
+                                   "Type_of_Lead","Wealth",
+                                   "Form_Submission_Date_Time_Stamp", @sfmc_curr_date,
+                                   "Email_Marketing_Consent", "True",
+                                   "Email_Marketing_Consent_Date_Time_Stamp", @sfmc_curr_date,
+                                   "UTM_campaign",@utm_campaign,
+                                   "UTM_content", @utm_content,
+                                   "UTM_medium",@utm_medium,
+                                   "UTM_source",@utm_source
+                                   )
+                                   
+        /* Insert data into pre.center  */                     
+                                   
+               SET @prefcenterdatainsert = UpsertData("EMAIL_PREFERENCE_CENTER",1,
+                "SUBSCRIBER_KEY", @AccountId,
+                "FIRST_NAME",@FirstName, 
+                "LAST_NAME",@LastName,
+                "PREFERRED_LANGUAGE",@Language,
+                "PROVINCE", @State, 
+                "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS", @Alertreminders,
+                "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY", @newsletter,
+                "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY", "true",
+                "BUSINESS_OWNER_ADVICE_PERIODICALLY", @newsletterforbusiness,
+                "UNSUBSCRIBE_FROM_ALL_EMAILS", "false",
+                "LAST_UPDATED_DATE", @sfmc_curr_date,
+                "IS_LEAD", "No",
+                "EMAIL_ADDRESS", @Email,
+                "IS_WEB_LEAD", "No"       
+                ) 
+
+            /* History */
+                SET @historyInsert = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER",1,
+                "HISTORY_ID", @guid,
+                "SUBSCRIBER_KEY", @AccountId,
+                "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS", @Alertreminders,
+                "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY", @newsletter,
+                "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY", "true",
+                "BUSINESS_OWNER_ADVICE_PERIODICALLY", @newsletterforbusiness,
+                "UNSUBSCRIBE_FROM_ALL_EMAILS", "false",
+                "LAST_UPDATED_DATE", @sfmc_curr_date,
+                "IS_LEAD", "No",
+                "EMAIL_ADDRESS", @Email,
+                "IS_WEB_LEAD", "No",
+                "TYPE", "WebForm Client Update"          
+                )                                   
+                               
+                                   
+/* Create and Set subscriber object at Account Level */
+SET @sub = CreateObject("Subscriber")
+SetObjectProperty(@sub, "EmailAddress", @Email)
+SetObjectProperty(@sub, "SubscriberKey", @AccountId)
+
+/* Add attributes to the subscriber if needed */
+SET @attr1 = CreateObject("Attribute")
+SetObjectProperty(@attr1, "Name", "Province") 
+SetObjectProperty(@attr1, "Value", @State)
+AddObjectArrayItem(@sub, "Attributes", @attr1)
+
+SET @attr2 = CreateObject("Attribute")
+SetObjectProperty(@attr2, "Name", "Existing_Client")
+SetObjectProperty(@attr2, "Value", "True")
+AddObjectArrayItem(@sub, "Attributes", @attr2)
+
+SET @attr3 = CreateObject("Attribute")
+SetObjectProperty(@attr3, "Name", "Record_Create_Date_Time")
+SetObjectProperty(@attr3, "Value", @sfmc_curr_date)
+AddObjectArrayItem(@sub, "Attributes", @attr3)
+
+SET @attr4 = CreateObject("Attribute")
+SetObjectProperty(@attr4, "Name", "FirstName")
+SetObjectProperty(@attr4, "Value", @FirstName)
+AddObjectArrayItem(@sub, "Attributes", @attr4)
+
+SET @attr5 = CreateObject("Attribute")
+SetObjectProperty(@attr5, "Name", "Language")
+SetObjectProperty(@attr5, "Value", @Language)
+AddObjectArrayItem(@sub, "Attributes", @attr5)
+
+SET @attr6 = CreateObject("Attribute")
+SetObjectProperty(@attr6, "Name", "Type_of_Lead")
+SetObjectProperty(@attr6, "Value", "Wealth")
+AddObjectArrayItem(@sub, "Attributes", @attr6)
+
+SET @attr9 = CreateObject("Attribute")
+SetObjectProperty(@attr9, "Name", "Marketing_Consent")
+SetObjectProperty(@attr9, "Value", "True")
+AddObjectArrayItem(@sub, "Attributes", @attr9)
+
+SET @attr10 = CreateObject("Attribute")
+SetObjectProperty(@attr10, "Name", "Marketing_Consent_Date_Time_Stamp")
+SetObjectProperty(@attr10, "Value", @sfmc_curr_date)
+AddObjectArrayItem(@sub, "Attributes", @attr10)
+
+/* Send Triggered send email */
+AddObjectArrayItem (@triggeredsend, "Subscribers", @sub)
+SET @ts_status = InvokeCreate(@triggeredsend, @ts_status)
+
+ SET @output = " got your account id"
+
+ 
+    
+  Elseif  RowCount(@LeadRows) > 0 THEN
+
+      SET @Leadinfo = Row(@LeadRows, 1)
+      SET @LeadId = Field(@Leadinfo, "Id")
+      SET @Email = Field(@Leadinfo, "Email")
+      SET @State = Field(@Leadinfo, "State")
+      /* Logic to update All Subscribers list */
+      set @sub = CreateObject("Subscriber")
+      setObjectProperty(@sub, "SubscriberKey", @LeadId)
+      setObjectProperty(@sub, "Status", "Active")
+      set @statusCode = InvokeUpdate(@sub, @statusMsg, @errorCode)
+
+      
+      SET @poi = Field(@Leadinfo, "Product_of_Interest__c")
+      Set @valueExists = Indexof(@poi, @Product_of_interest) 
+      IF @valueExists > 0 then
+      SET @newpoi = @poi
+      SET @output1 = "you have already subscribe for this webform"
+      ELSE 
+      SET @newpoi = Concat(@poi, ";", @Product_of_interest)
+      SET @updateRecord = UpdateSingleSalesforceObject(
+                                     "Lead", @LeadId,
+                                     "Product_of_Interest__c", @newpoi,
+                                     "Web_Form__c", "True",
+                                     "Email_Marketing_Consent_Date__c", @sfmc_curr_date,
+                                     "Email_Marketing_Consent__c", "Yes"
+                                 )
+       SET @output1 = "your new preference is submitted"  
+       
+      Endif
+      
+    SET @DoubleOptin = Lookup("double_opt_in_de", "Double_Optin", "SubscriberKey", @LeadId) 
+                      IF EMPTY (@DoubleOptin) THEN
+                        SET @DoubleOptin = "False"
+                        SET @DoubleOptinTime = " "
+                      ELSE  @DoubleOptin = "True" THEN
+                        SET @DoubleOptinTime = Lookup("double_opt_in_de", "Double_Optin_Date_Time_Stamp", "SubscriberKey", @LeadId)                        
+                      ENDIF
+
+   /*                  
+    SET @webformde = "Wealth_web_form_de"
+    SET @typeofleadvalue = Lookup(@webformde, "Type_of_Lead", "SubscriberKey", @LeadId )
+    Set @typeofleadexists = Indexof(@typeofleadvalue, @Type_of_Lead)
+    
+   IF @typeofleadexists > 0 then    
+    Then
+    SET @New_Type_of_Lead = @typeofleadvalue
+    ELSE
+    SET @New_Type_of_Lead = Concat(@Type_of_Lead, ";", @typeofleadvalue)
+    ENDIF
+    
+    */
+      
+    SET @datainsert = UpsertData("Wealth_web_form_de",1, 
+                                   "SubscriberKey",@LeadId, 
+                                   "FirstName",@FirstName, 
+                                   "LastName",@LastName, 
+                                   "Email",@Email,
+                                   "Province",@State,
+                                   "Existing_client","False",
+                                   "Type_of_Lead",@Type_of_Lead,
+                                   "Form_Submission_Date_Time_Stamp", @sfmc_curr_date,
+                                   "Language", @Language,
+                                   "Email_Marketing_Consent", "True",
+                                   "Email_Marketing_Consent_Date_Time_Stamp", @sfmc_curr_date,
+                                   "Double_Optin", @DoubleOptin,
+                                   "Double_Optin_Date_Time_Stamp", @DoubleOptinTime,
+                                   "UTM_campaign",@utm_campaign,
+                                   "UTM_content", @utm_content,
+                                   "UTM_medium",@utm_medium,
+                                   "UTM_source",@utm_source
+                                   )
+                                   
+                                   
+                             
+        /* Insert data into pre.center  */                              
+                                   
+              SET @prefcenterdatainsert = UpsertData("EMAIL_PREFERENCE_CENTER",1,
+                                   "SUBSCRIBER_KEY", @LeadId,
+                                   "EMAIL_ADDRESS", @Email,
+                                   "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY", "true",
+                                   "LAST_UPDATED_DATE", @sfmc_curr_date                                                 
+                                    )
+
+             SET @historyInsert = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER",1,
+                "HISTORY_ID", @guid,
+                "SUBSCRIBER_KEY", @LeadId,
+                "EMAIL_ADDRESS", @Email,
+                "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY", "true",
+                "TYPE", "WebLead Update",
+                "IS_LEAD", "No",
+                "IS_WEB_LEAD", "Yes",
+                "LAST_UPDATED_DATE", @sfmc_curr_date                                
+                )                                                               
+
+
+
+        
+/* Create and Set subscriber object at Account Level */
+SET @sub = CreateObject("Subscriber")
+SetObjectProperty(@sub, "EmailAddress", @Email)
+SetObjectProperty(@sub, "SubscriberKey", @LeadId)
+
+/* Add attributes to the subscriber if needed */
+SET @attr1 = CreateObject("Attribute")
+SetObjectProperty(@attr1, "Name", "Province")
+SetObjectProperty(@attr1, "Value", @State)
+AddObjectArrayItem(@sub, "Attributes", @attr1)
+
+SET @attr2 = CreateObject("Attribute")
+SetObjectProperty(@attr2, "Name", "Existing_Client")
+SetObjectProperty(@attr2, "Value", "False")
+AddObjectArrayItem(@sub, "Attributes", @attr2)
+
+SET @attr3 = CreateObject("Attribute")
+SetObjectProperty(@attr3, "Name", "Record_Create_Date_Time")
+SetObjectProperty(@attr3, "Value", @sfmc_curr_date)
+AddObjectArrayItem(@sub, "Attributes", @attr3)
+
+SET @attr4 = CreateObject("Attribute")
+SetObjectProperty(@attr4, "Name", "FirstName")
+SetObjectProperty(@attr4, "Value", @FirstName)
+AddObjectArrayItem(@sub, "Attributes", @attr4)
+
+SET @attr5 = CreateObject("Attribute")
+SetObjectProperty(@attr5, "Name", "Language")
+SetObjectProperty(@attr5, "Value", @Language)
+AddObjectArrayItem(@sub, "Attributes", @attr5)
+
+SET @attr6 = CreateObject("Attribute")
+SetObjectProperty(@attr6, "Name", "Double_Optin")
+SetObjectProperty(@attr6, "Value", @DoubleOptin)
+AddObjectArrayItem(@sub, "Attributes", @attr6)
+
+SET @attr7 = CreateObject("Attribute")
+SetObjectProperty(@attr7, "Name", "Double_Optin_Date_Time_Stamp")
+SetObjectProperty(@attr7, "Value", @DoubleOptinTime)
+AddObjectArrayItem(@sub, "Attributes", @attr7)
+
+SET @attr8 = CreateObject("Attribute")
+SetObjectProperty(@attr8, "Name", "Type_of_Lead")
+SetObjectProperty(@attr8, "Value", @Type_of_Lead)
+AddObjectArrayItem(@sub, "Attributes", @attr8)
+
+SET @attr9 = CreateObject("Attribute")
+SetObjectProperty(@attr9, "Name", "Marketing_Consent")
+SetObjectProperty(@attr9, "Value", "True")
+AddObjectArrayItem(@sub, "Attributes", @attr9)
+
+SET @attr10 = CreateObject("Attribute")
+SetObjectProperty(@attr10, "Name", "Marketing_Consent_Date_Time_Stamp")
+SetObjectProperty(@attr10, "Value", @sfmc_curr_date)
+AddObjectArrayItem(@sub, "Attributes", @attr10)
+
+/* Send Triggered send email */
+AddObjectArrayItem (@triggeredsend, "Subscribers", @sub)
+SET @ts_status = InvokeCreate(@triggeredsend, @ts_status)
+  
+       SET @output = " got your lead id"
+       
+       
+Else
+
+   
+/* Retrieve the Record Type ID */
+        SET @rows = RetrieveSalesforceObjects(
+        @objectName, 
+        "RecordTypeId", 
+        "Record_Type__c", "=", @recordTypeName, 
+        )
+        
+        
+/* Check if any rows were returned */
+    IF RowCount(@rows) > 0 THEN
+        SET @row = Row(@rows, 1)
+        SET @recordTypeId = Field(@row, "RecordTypeId")
+        OutputLine("Record Type ID: " + @recordTypeId)
+    ELSE
+        OutputLine("Record Type not found.")
+    ENDIF
+   
+        
+         SET @createResult = CreateSalesforceObject(
+                        "Lead", 16,
+                        "Email", @Email,
+                        "FirstName", @FirstName,
+                        "LastName", @LastName,
+                        "Country", @Country,
+                        "State", @State,
+                        "Status","Open - Not Contacted",
+                        "RecordTypeId", @recordTypeId,
+                        "Action_By_Date__c", @sfmc_curr_date,
+                        "Preferred_Language__c", @language,
+                        "Product_of_Interest__c", @Product_of_interest,
+                        "LeadSource", @LeadSource,
+                        "Marketing_Consent__c", "No",
+                        "Marketing_Consent_Date__c", @sfmc_curr_date,
+                        "Web_Form__c", "True",
+                        "Email_Marketing_Consent_Date__c", @sfmc_curr_date,
+                        "Email_Marketing_Consent__c", "Yes"
+                         ) 
+                         
+           
+          SET @datainsert = UpsertData("Wealth_web_form_de",1, 
+                                   "SubscriberKey",@createResult, 
+                                   "FirstName",@FirstName, 
+                                   "LastName",@LastName, 
+                                   "Email",@Email,
+                                   "Province",@State,
+                                   "Existing_client","False",
+                                   "Type_of_Lead", @Type_of_Lead,
+                                   "Form_Submission_Date_Time_Stamp", @sfmc_curr_date,
+                                   "Language", @Language,
+                                   "Email_Marketing_Consent", "True",
+                                   "Email_Marketing_Consent_Date_Time_Stamp", @sfmc_curr_date,
+                                   "Double_Optin", "False",
+                                   "UTM_campaign",@utm_campaign,
+                                   "UTM_content", @utm_content,
+                                   "UTM_medium",@utm_medium,
+                                   "UTM_source",@utm_source
+                                   )
+
+
+      /* Insert data into pre.center  */
+               
+                  SET @prefcenterdatainsert = UpsertData("EMAIL_PREFERENCE_CENTER",1,
+                                   "SUBSCRIBER_KEY", @createResult,
+                                   "FIRST_NAME",@FirstName, 
+                                   "LAST_NAME",@LastName,
+                                   "PREFERRED_LANGUAGE",@Language,
+                                   "PROVINCE", @State,
+                                   "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS", "false",
+                                   "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY", "false",
+                                   "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY", "true",
+                                   "FINANCE_FINANCIAL_MARKET_UPDATES_AND_INSIGHTS", "false",
+                                   "FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT", "false",
+                                   "BUSINESS_OWNER_ADVICE_PERIODICALLY", "false",
+                                   "BUSINESS_GROUP_BENEFITS_PERIODICALLY", "false",
+                                   "UNSUBSCRIBE_FROM_ALL_EMAILS", "false",
+                                   "LAST_UPDATED_DATE", @sfmc_curr_date,
+                                   "IS_LEAD", "No",
+                                   "AUTO_QUOTE", "false",
+                                   "HOME_QUOTE", "false",
+                                   "EMAIL_ADDRESS", @Email,
+                                   "IS_WEB_LEAD", "Yes"
+          
+                                   )
+
+                /* History Intake  */
+                    SET @prefcenterdatainsert = UpsertData("HISTORY_EMAIL_PREFERENCE_CENTER",1,
+                    "HISTORY_ID", @guid,
+                    "SUBSCRIBER_KEY", @createResult,
+                    "GENERAL_EXTREME_WEATHER_AND_CLAIM_ALERTS", "false",
+                    "GENERAL_INSURANCE_AND_INVESTMENT_ADVICE_MONTHLY", "false",
+                    "GENERAL_PRODUCT_AND_SERVICE_OFFER_PERIODICALLY", "true",
+                    "FINANCE_FINANCIAL_MARKET_UPDATES_AND_INSIGHTS", "false",
+                    "FINANCE_WEALTH_AND_PERSONAL_FINANCE_SUPPORT", "false",
+                    "BUSINESS_OWNER_ADVICE_PERIODICALLY", "false",
+                    "BUSINESS_GROUP_BENEFITS_PERIODICALLY", "false",
+                    "UNSUBSCRIBE_FROM_ALL_EMAILS", "false",
+                    "LAST_UPDATED_DATE", @sfmc_curr_date,
+                    "IS_LEAD", "No",
+                    "AUTO_QUOTE", "false",
+                    "HOME_QUOTE", "false",
+                    "EMAIL_ADDRESS", @Email,
+                    "IS_WEB_LEAD", "Yes",
+                    "TYPE", "WebLead Intake"
+                    )
+ 
+
+
+
+/* Create and Set subscriber object at Account Level */
+SET @sub = CreateObject("Subscriber")
+SetObjectProperty(@sub, "EmailAddress", @Email)
+SetObjectProperty(@sub, "SubscriberKey", @createResult)
+
+/* Add attributes to the subscriber if needed */
+SET @attr1 = CreateObject("Attribute")
+SetObjectProperty(@attr1, "Name", "Province")
+SetObjectProperty(@attr1, "Value", @State)
+AddObjectArrayItem(@sub, "Attributes", @attr1)
+
+SET @attr2 = CreateObject("Attribute")
+SetObjectProperty(@attr2, "Name", "Existing_Client")
+SetObjectProperty(@attr2, "Value", "False")
+AddObjectArrayItem(@sub, "Attributes", @attr2)
+
+SET @attr3 = CreateObject("Attribute")
+SetObjectProperty(@attr3, "Name", "Record_Create_Date_Time")
+SetObjectProperty(@attr3, "Value", @sfmc_curr_date)
+AddObjectArrayItem(@sub, "Attributes", @attr3)
+
+SET @attr4 = CreateObject("Attribute")
+SetObjectProperty(@attr4, "Name", "FirstName")
+SetObjectProperty(@attr4, "Value", @FirstName)
+AddObjectArrayItem(@sub, "Attributes", @attr4)
+
+SET @attr5 = CreateObject("Attribute")
+SetObjectProperty(@attr5, "Name", "Language")
+SetObjectProperty(@attr5, "Value", @Language)
+AddObjectArrayItem(@sub, "Attributes", @attr5)
+
+SET @attr6 = CreateObject("Attribute")
+SetObjectProperty(@attr6, "Name", "Double_Optin")
+SetObjectProperty(@attr6, "Value", "False")
+AddObjectArrayItem(@sub, "Attributes", @attr6)
+
+SET @attr8 = CreateObject("Attribute")
+SetObjectProperty(@attr8, "Name", "Type_of_Lead")
+SetObjectProperty(@attr8, "Value", @Type_of_Lead)
+AddObjectArrayItem(@sub, "Attributes", @attr8)
+
+SET @attr9 = CreateObject("Attribute")
+SetObjectProperty(@attr9, "Name", "Marketing_Consent")
+SetObjectProperty(@attr9, "Value", "True")
+AddObjectArrayItem(@sub, "Attributes", @attr9)
+
+SET @attr10 = CreateObject("Attribute")
+SetObjectProperty(@attr10, "Name", "Marketing_Consent_Date_Time_Stamp")
+SetObjectProperty(@attr10, "Value", @sfmc_curr_date)
+AddObjectArrayItem(@sub, "Attributes", @attr10)
+
+/* Send Triggered send email */
+AddObjectArrayItem (@triggeredsend, "Subscribers", @sub)
+SET @ts_status = InvokeCreate(@triggeredsend, @ts_status)
+
+
+            SET @output = "Hey you are a new lead"     
+                 
+    Endif   
+    
+    
+ENDIF    
+  
+ ]%%
+
+<script runat="server">
+    }catch(e){
+Write(Stringify(e));
+}
+</script>
+%%=v(@utm_source)=%%
+%%=v(@utm_content)=%%
+<br>
+%%=v(@Email)=%%
+%%=v(@output)=%%
+%%=v(@output1)=%%
+NEWS LETTER VALUE%%=v(@newsletter)=%%
+<br>
+Alertreminders%%=v(@Alertreminders)=%%
+<br>
+newsletterforbusiness::%%=v(@newsletterforbusiness)=%%
+<br>
+DE value is : %%=v(@typeofleadvalue)=%%
+NEW de value :  %%=v(@New_Type_of_Lead)=%%
+
+ %%[ if not empty(@createResult) then ]%%
+         <p>%%=v(@createResult)=%% record created in Lead Object</p>
+        <p>%%=v(@FirstName)=%% record created in Lead Object</p>
+        <p>%%=v(@LastName)=%% record created in Lead Object</p>
+      %%[ endif ]%%
+
+
+
+          </template>
         </div>
-      </div>      
+        <div class="subsection">
+          <p class="subsection-label">SSJS</p>
+          <pre><code id="code-tmpl-ssjsherobanner"></code></pre>
+          <template id="tmpl-tmpl-ssjsherobanner"> // ssjs
+export class StyleField {
+    label: string;
+    className: string;
+}
+
+
+export class BannerWithCTATemplate implements CampaignTemplateComponent {
+
+
+    @title("Background Image URL")
+    @subtitle("Replace the placeholder image URL with the image URL for your background image.")
+    imageURL: string = "/-/media/REDACT/assets/home/banners/l0-personal-banner.png";
+    
+    @subtitle("Optional text field")
+    header: string = "Investments. Insurance. Advice.";
+    
+    @subtitle("Optional text field")
+    headeraccent: string = "";
+
+
+    @subtitle("Optional text field")
+    subheader: string = " Get personalized advice and custom solutions from someone who gets you.";
+
+
+    @title("CTA Text")
+    ctatext: string = "Explore insurance plans";
+
+
+    @title("CTA Destination URL")
+    @subtitle("Requires full URL string including https://")
+    ctaurl: string = "/en/personal/insurance";
+
+
+    @title("Retrieve CTA Text")
+    retctatext: string = "Browse investment options";
+
+
+    @title("Retrieve CTA Destination URL")
+    @subtitle("Requires full URL string including https://")
+    retctaurl: string = "/en/personal/investments";
+
+
+    run(context: CampaignComponentContext) {
+        return {};
+    }
+
+
+}
+
+          </template>
+        </div>
+        </div>      
 
     </div>
+
+    <script>
+      // Copy template HTML into code blocks
+      document.querySelectorAll('template[id^="tmpl-"]').forEach(function(tmpl) {
+        var codeEl = document.getElementById(tmpl.id.replace('tmpl-', 'code-'));
+        if (codeEl) codeEl.textContent = tmpl.innerHTML;
+      });
+
+      // Collapsible projects — start all collapsed
+      document.querySelectorAll('.project').forEach(function(project) {
+        var titleEl = project.querySelector('.project-title');
+        if (!titleEl) return;
+
+        // Build toggle button
+        var btn = document.createElement('button');
+        btn.className = 'toggle-btn';
+        btn.setAttribute('aria-label', 'Toggle section');
+        btn.textContent = '▶';
+
+        // Wrap button + title in a clickable header row
+        var header = document.createElement('div');
+        header.className = 'project-header';
+        titleEl.parentNode.insertBefore(header, titleEl);
+        header.appendChild(btn);
+        header.appendChild(titleEl);
+
+        // Start collapsed
+        project.classList.add('collapsed');
+
+        header.addEventListener('click', function() {
+          project.classList.toggle('collapsed');
+          btn.textContent = project.classList.contains('collapsed') ? '▶' : '▼';
+        });
+      });
+
+      // Collapsible subsections — start all collapsed
+      document.querySelectorAll('.subsection').forEach(function(sub) {
+        var labelEl = sub.querySelector('.subsection-label');
+        if (!labelEl) return;
+
+        var btn = document.createElement('button');
+        btn.className = 'subsection-toggle-btn';
+        btn.setAttribute('aria-label', 'Toggle subsection');
+        btn.textContent = '▶';
+
+        var header = document.createElement('div');
+        header.className = 'subsection-header';
+        labelEl.parentNode.insertBefore(header, labelEl);
+        header.appendChild(btn);
+        header.appendChild(labelEl);
+
+        sub.classList.add('collapsed');
+
+        header.addEventListener('click', function() {
+          sub.classList.toggle('collapsed');
+          btn.textContent = sub.classList.contains('collapsed') ? '▶' : '▼';
+        });
+      });
+    </script>
   </body>
 </html>
 
