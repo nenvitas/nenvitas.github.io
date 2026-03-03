@@ -83,6 +83,76 @@
         border-radius: 4px;
         flex: 1 1 300px;
       }
+
+      /* ── Collapsible projects ── */
+      .project-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-bottom: 6px;
+      }
+
+      .project-header .project-title {
+        margin: 0;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        font-size: 11px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      /* hide subsections and direct pre/screenshots when project is collapsed */
+      .project.collapsed .subsection,
+      .project.collapsed > pre,
+      .project.collapsed > .screenshots {
+        display: none;
+      }
+
+      /* ── Collapsible subsections ── */
+      .subsection {
+        margin-bottom: 16px;
+      }
+
+      .subsection-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        margin-bottom: 8px;
+        margin-top: 8px;
+      }
+
+      .subsection-header .subsection-label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: bold;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .subsection-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 10px;
+        color: #bbb;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .subsection.collapsed pre,
+      .subsection.collapsed .screenshots {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -100,44 +170,58 @@
 
       <!-- ── Project 1 ── -->
       <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
+        <p class="project-title">Email Template</p>
+        <p class="project-desc">Description on the build and how our modular system works</p>
+      
 
-        <pre><code>// paste your code here
-function example() {
-  return "hello world";
-}</code></pre>
+        <div class="subsection">
+<pre><code id="code-tmpl-html"> // Email Templates
+  Our templates were built entirely modular, with interchangeability being a key component.
+  I designed master templates that would be used for every email, and then 
+  created dynamic content blocks that would be used to populate the content.
+  The master templates include locked portions of the email that would never change, 
+  such as the header, footer, and navigation bar.
+  The dynamic content blocks would be used to populate the content, 
+  such as the hero image, call to action, and body content.
+  This allowed for easy scalability and maintainability of our email program.
 
+  // Dynamic Content Types
+  We have a total of 300+ dynamic content blocks that are used to populate the content of the emails.
+  Each content block is designed to be reusable across multiple emails, and can be 
+  easily swapped out to change the look and feel of the email.
+  The types of content blocks we have include:
+  - Hero Image
+  - Hero Image Mobile
+  - Hero Image Tablet
+  - Hero Image Desktop
+  - Hero Image Alt Text
+  - Body Content
+  - Body Content Mobile
+  - Body Content Tablet
+  - Body Content Desktop
+  - Body Content Alt Text
+  - Call to Action
+  - Call to Action Mobile
+  - Call to Action Tablet
+  - Call to Action Desktop
+  - Call to Action Alt Text
+  - etc.
+
+These are all readily available in package manager, can be exported and 
+reimported back into the system to avoid time consuming menu diving through manual duplication.
+          </code></pre>
+        </div>
         <div class="screenshots">
-          <!-- <img src="assets/images/screenshot1.png" alt="Screenshot 1"> -->
+               <img src="assets/images/dynamictemp.png" alt="Screenshot 1">
+               <img src="assets/images/dynamiccontent.png" alt="Screenshot 1">
+               <img src="assets/images/modulartemp.png" alt="Screenshot 1">
+               <img src="assets/images/dynamictype.png" alt="Screenshot 1">
         </div>
       </div>
-
-      <!-- ── Project 2 ── -->
-      <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// paste your code here</code></pre>
-
-        <div class="screenshots">
-          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
-        </div>
-      </div>
-
-      <!-- ── Project 3 ── -->
-      <div class="project">
-        <p class="project-title">Project Title</p>
-        <p class="project-desc">Short description of what this does.</p>
-
-        <pre><code>// paste your code here</code></pre>
-
-        <div class="screenshots">
-          <!-- <img src="assets/images/screenshot2.png" alt="Screenshot 2"> -->
-        </div>
-      </div>      
 
     </div>
+
+
   </body>
 </html>
 

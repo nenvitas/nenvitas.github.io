@@ -174,13 +174,18 @@
         <p class="project-desc">SQL Activities from our Life Journey integrations</p>
       
         <div class="screenshots">
+               <img src="assets/images/lifejourneybuild.png" alt="Screenshot 1">
                <img src="assets/images/lifejourney.png" alt="Screenshot 1">
                <img src="assets/images/lifestatus.png" alt="Screenshot 1">
         </div>
         <div class="subsection">
           <p class="subsection-label">Life Journey Automation Activities</p>
           <pre><code id="code-tmpl-html"></code></pre>
-          <template id="tmpl-tmpl-html"> // Life_Journey_DE_Automation
+          <template id="tmpl-tmpl-html"> // 
+            This automation is used to populate the Life Journey DE used by the Life Journey Builder journey.
+            It checks only for new records in the Life_web_form_de and then pulls in the relevant data from the double_opt_in_de and Life_Journey_DE.
+            It also checks only for records that are not null in the Life_web_form_de and for records preference types.
+            Life_Journey_DE_Automation
 SELECT
 wwf.SubscriberKey AS SubscriberKey,
 wwf.FirstName AS FirstName,
@@ -339,13 +344,19 @@ WHERE t3.PolicyType = 'Life'
         <p class="project-desc">SQL Activities from our Wealth Journey integrations</p>
       
         <div class="screenshots">
+               <img src="assets/images/wealthjourneybuild.png" alt="Screenshot 1">
                <img src="assets/images/wealthjourney.png" alt="Screenshot 1">
                <img src="assets/images/wealthstatus.png" alt="Screenshot 1">
         </div>
         <div class="subsection">
           <p class="subsection-label">Wealth Journey Automation Activities</p>
           <pre><code id="code-tmpl-htmlwealth"></code></pre>
-          <template id="tmpl-tmpl-htmlwealth"> // Wealth_Journey_DE_Automation
+          <template id="tmpl-tmpl-htmlwealth"> // 
+            This automation is used to populate the Wealth Journey DE used by the Wealth Journey Builder journey.
+            It checks only for new records in the Wealth_web_form_de and then pulls in the relevant data from the double_opt_in_de and Wealth_Journey_DE.
+            It also checks only for records that are not null in the Wealth_web_form_de and for records preference types.
+            
+            Wealth_Journey_DE_Automation
 SELECT
 wwf.SubscriberKey AS SubscriberKey,
 wwf.FirstName AS FirstName,

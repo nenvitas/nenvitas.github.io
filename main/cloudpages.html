@@ -181,6 +181,10 @@
           <p class="subsection-label">Submission page</p>
           <pre><code id="code-tmpl-html"></code></pre>
           <template id="tmpl-tmpl-html"> // Preference Center Submission
+            The preference center submission page is a cloud page that is used to submit preference center data.
+            Users can update their preferences and submit the form to update their preferences.
+            The first page acts as a verification page to ensure the user wants to update their preferences.
+            The second page is the thank you page that confirms the user's preferences have been updated.
 <script runat="server">
     Platform.Load('Core','1');    
     
@@ -795,29 +799,29 @@ ELSE
     <div class="footer__row footer__row--border mktoText" id="footer-legal-text">
         <ul class="footer__list footer__list--inline footer__list--center">
            %%[ IF @languageID == 'en' AND @isLead == "Yes" THEN ]%%
-          <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"> <u>Legal</u> </a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u> Privacy </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u> Contact Us </u></a></li>
+          <li class="list__item"><a target="_blank" href="REDACT"> <u>Legal</u> </a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Privacy </u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Contact Us </u></a></li>
            %%[ ELSEIF @languageID == 'fr' AND @isLead == "Yes" THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Contactez-nous </u></a></li>
           %%[ ELSEIF @languageID == 'fr' AND @group_client_data == "Yes" THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/legal.aspx"><u> Notes juridiques </u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy-Policy.aspx"><u> Vie privée </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/contact-us.aspx"><u>Contactez-nous </u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Contactez-nous </u></a></li>
           %%[ ELSEIF @languageID == 'en' AND @group_client_data == "Yes" THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/legal.aspx"><u>Legal</u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy-Policy.aspx"><u>Privacy</u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/contact-us.aspx"><u>Contact Us</u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Contact Us</u></a></li>
           %%[ ELSEIF @languageID == 'fr' THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Contactez-nous </u></a></li>
           %%[ELSE]%% 
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"><u>Legal</u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u>Privacy</u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u>Contact Us</u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Contact Us</u></a></li>
           %%[ENDIF]%%
         </ul>
     </div>
@@ -1253,29 +1257,24 @@ Fields that map to CRM that would normally be boolean are "Yes" and "No" maybe b
     <div class="footer__row footer__row--border mktoText" id="footer-legal-text">
         <ul class="footer__list footer__list--inline footer__list--center">
            %%[ IF @languageID == 'en' AND @isLead == "Yes" THEN ]%%
-          <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"> <u>Legal</u> </a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u> Privacy </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u> Contact Us </u></a></li>
+          <li class="list__item"><a target="_blank" href="REDACT"> <u>Legal</u> </a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Privacy </u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Contact Us </u></a></li>
            %%[ ELSEIF @languageID == 'fr' AND @isLead == "Yes" THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Notes juridiques </u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Vie privée </u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Contactez-nous </u></a></li>
           %%[ ELSEIF @languageID == 'fr' AND @group_client_data == "Yes" THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/legal.aspx"><u> Notes juridiques </u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy-Policy.aspx"><u> Vie privée </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsassurancegroupe.ca/fr-CA/about-us/contact-us.aspx"><u>Contactez-nous </u></a></li>
           %%[ ELSEIF @languageID == 'en' AND @group_client_data == "Yes" THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/legal.aspx"><u>Legal</u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy-Policy.aspx"><u>Privacy</u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperatorsgroupinsurance.ca/en/about-us/contact-us.aspx"><u>Contact Us</u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Contact Us</u></a></li>
           %%[ ELSEIF @languageID == 'fr' THEN ]%%
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Legal-v.aspx"><u> Notes juridiques </u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/Privacy.aspx"><u> Vie privée </u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/fr-CA/PublicPages/ContactUs.aspx"><u> Contactez-nous </u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u> Notes juridiques </u></a> </li>
           %%[ELSE]%% 
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Legal-v.aspx"><u>Legal</u></a> </li>
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/Privacy.aspx"><u>Privacy</u></a></li>        
-            <li class="list__item"><a target="_blank" href="https://www.cooperators.ca/en/PublicPages/ContactUs.aspx"><u>Contact Us</u></a></li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Legal</u></a> </li>
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Privacy</u></a></li>        
+            <li class="list__item"><a target="_blank" href="REDACT"><u>Contact Us</u></a></li>
           %%[ENDIF]%%
         </ul>
     </div>
@@ -1481,7 +1480,7 @@ ul {
   </style>
 <table width="100%" cellspacing="0" cellpadding="0" role="presentation" class="image_topbar_cls">
   <tr>
-    <td align="left"><img data-assetid="271591" src="https://image.message.cooperators.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
+    <td align="left"><img data-assetid="271591" src="https://image.message.REDACT.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
   </tr>
 </table>
 
@@ -1489,7 +1488,7 @@ ul {
   <div class="container">
     <h1>%%=v(@Header)=%%</h1>
     <p>%%=v(@BodyCopy)=%%</p>
-<img data-assetid="271591" src="https://image.dev-message.cooperators.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
+<img data-assetid="271591" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
     <form id="ctaForm" method="GET">
 
 
@@ -1691,7 +1690,7 @@ ul {
   </style>
 <table width="100%" cellspacing="0" cellpadding="0" role="presentation" class="image_topbar_cls">
   <tr>
-    <td align="left"><img data-assetid="271591" src="https://image.message.cooperators.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
+    <td align="left"><img data-assetid="271591" src="https://image.message.REDACT.ca/lib/fe2e11717164067f701278/m/1/8a0fa263-1ecc-4689-b090-eb18e562769c.png" alt="co-operators" height="54" width="260" style="display: block; text-align: left; height: 54px; width: 260px; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image"></td>
   </tr>
 </table>
 
@@ -1699,7 +1698,7 @@ ul {
   <div class="container">
     <h1>%%=v(@Header)=%%</h1>
     <p>%%=v(@BodyCopy)=%%</p>
-<img data-assetid="271591" src="https://image.dev-message.cooperators.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
+<img data-assetid="271591" src="https://image.dev-message.REDACT.ca/lib/fe3611717164067f761676/m/1/f64f7db1-a5d9-40ea-bce7-1cb5c18b824e.png" alt="co-operators" width="260" style="display: inline-flex; padding: 0px; margin: 20px 50px; border: 0px none transparent;" class="logo_image">
     <form id="ctaForm" method="GET">
 
 
